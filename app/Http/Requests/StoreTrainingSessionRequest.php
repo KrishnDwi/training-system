@@ -8,7 +8,7 @@ class StoreTrainingSessionRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; // tidak ada role/permission di v1
+        return auth()->check(); // tidak ada role/permission di v1
     }
 
     public function rules(): array
@@ -25,6 +25,10 @@ class StoreTrainingSessionRequest extends FormRequest
 
             'employee_ids' => ['required', 'array', 'min:1'],
             'employee_ids.*' => ['exists:employees,id'],
+
+            'materials' => ['nullable', 'array'],
+            'materials.*.title' => ['nullable', 'string', 'max:150'],
+            'materials.*.file' => ['nullable', 'file', 'max:51200'],
         ];
     }
 
