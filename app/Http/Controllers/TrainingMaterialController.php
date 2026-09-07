@@ -4,11 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\TrainingMaterial;
 use App\Models\TrainingModule;
+use App\Services\TrainingMaterialService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class TrainingMaterialController extends Controller
 {
+    public function __construct(protected TrainingMaterialService $trainingMaterialService)
+    {
+    }
+
     /**
      * File disimpan di disk 'local' (storage/app/private secara default di
      * Laravel 12) — SENGAJA BUKAN disk 'public', supaya tidak ada URL publik
@@ -22,16 +27,11 @@ class TrainingMaterialController extends Controller
             'file' => ['required', 'file', 'max:51200'], // maks 50MB
         ]);
 
-        $file = $request->file('file');
-        $path = $file->store('training-materials', 'local');
-
-        $trainingModule->materials()->create([
-            'title' => $request->title,
-            'file_path' => $path,
-            'original_filename' => $file->getClientOriginalName(),
-            'mime_type' => $file->getClientMimeType(),
-            'file_size' => $file->getSize(),
-        ]);
+        $this->trainingMaterialService->store(
+            $trainingModule,
+            $request->title,
+            $request->file('file')
+        );
 
         return back()->with('success', 'Materi berhasil diupload.');
     }
