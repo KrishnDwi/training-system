@@ -36,13 +36,37 @@ php artisan migrate
 
 ## 3. Tambahkan Route (routes/web.php)
 
+**Ini blok LENGKAP** — mencakup semua route dari seluruh fitur di dokumen ini
+(Master Training, Data Karyawan, Dashboard, Report, Portal Karyawan, Materi
+Training, Bank Soal Pre-Test/Post-Test). Tinggal copy semua sekaligus, tidak
+perlu cari-cari potongan lain di bagian bawah dokumen ini.
+
 ```php
 use App\Http\Controllers\TrainingSessionController;
 use App\Http\Controllers\TrainingModuleController;
+use App\Http\Controllers\TrainingMaterialController;
+use App\Http\Controllers\TrainingModuleQuestionController;
+use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\EmployeeContractController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\EmployeeAuthController;
+use App\Http\Controllers\EmployeePortalController;
+use App\Http\Controllers\PortalTestController;
 
-Route::resource('training-sessions', TrainingSessionController::class)
-    ->only(['index', 'create', 'store', 'show']);
+/*
+|--------------------------------------------------------------------------
+| Dashboard (root)
+|--------------------------------------------------------------------------
+*/
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/', [DashboardController::class, 'index']); // arahkan root ke dashboard
 
+/*
+|--------------------------------------------------------------------------
+| Master Training + Materi + Bank Soal
+|--------------------------------------------------------------------------
+*/
 // PENTING: route 'data' harus didaftarkan SEBELUM Route::resource,
 // supaya 'data' tidak tertangkap sebagai {training_module} (route model binding).
 Route::get('training-modules/data', [TrainingModuleController::class, 'data'])
@@ -51,10 +75,31 @@ Route::get('training-modules/data', [TrainingModuleController::class, 'data'])
 Route::resource('training-modules', TrainingModuleController::class)
     ->except(['show']); // tidak perlu halaman detail terpisah untuk master data sederhana ini
 
-// Data Karyawan
-use App\Http\Controllers\EmployeeController;
-use App\Http\Controllers\EmployeeContractController;
+Route::post('training-modules/{training_module}/materials', [TrainingMaterialController::class, 'store'])
+    ->name('training-modules.materials.store');
+Route::delete('training-modules/{training_module}/materials/{material}', [TrainingMaterialController::class, 'destroy'])
+    ->name('training-modules.materials.destroy');
 
+Route::post('training-modules/{training_module}/questions', [TrainingModuleQuestionController::class, 'store'])
+    ->name('training-modules.questions.store');
+Route::put('training-modules/{training_module}/questions/{question}', [TrainingModuleQuestionController::class, 'update'])
+    ->name('training-modules.questions.update');
+Route::delete('training-modules/{training_module}/questions/{question}', [TrainingModuleQuestionController::class, 'destroy'])
+    ->name('training-modules.questions.destroy');
+
+/*
+|--------------------------------------------------------------------------
+| Training Session
+|--------------------------------------------------------------------------
+*/
+Route::resource('training-sessions', TrainingSessionController::class)
+    ->only(['index', 'create', 'store', 'show']);
+
+/*
+|--------------------------------------------------------------------------
+| Data Karyawan + Kontrak
+|--------------------------------------------------------------------------
+*/
 Route::get('employees/data', [EmployeeController::class, 'data'])
     ->name('employees.data'); // didaftarkan sebelum resource, sama seperti training-modules/data
 
@@ -66,28 +111,56 @@ Route::post('employees/import', [EmployeeController::class, 'import'])
 Route::get('employees/export/master', [EmployeeController::class, 'exportMaster'])
     ->name('employees.export.master');
 
+// 'show' TIDAK di-except — dipakai untuk halaman Detail Karyawan
+// (riwayat training + mandatory yang belum/perlu dilakukan).
 Route::resource('employees', EmployeeController::class);
-// Catatan: 'show' TIDAK di-except lagi seperti sebelumnya — sekarang dipakai
-// untuk halaman Detail Karyawan (riwayat training + mandatory yang belum/perlu dilakukan).
 
 Route::post('employees/{employee}/contracts', [EmployeeContractController::class, 'store'])
     ->name('employees.contracts.store');
 Route::delete('employees/{employee}/contracts/{contract}', [EmployeeContractController::class, 'destroy'])
     ->name('employees.contracts.destroy');
 
-// Dashboard
-use App\Http\Controllers\DashboardController;
-
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-Route::get('/', [DashboardController::class, 'index']); // arahkan root ke dashboard
-
-// Report
-use App\Http\Controllers\ReportController;
-
+/*
+|--------------------------------------------------------------------------
+| Report
+|--------------------------------------------------------------------------
+*/
 Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 Route::get('/reports/export/excel', [ReportController::class, 'exportExcel'])->name('reports.export.excel');
 Route::get('/reports/export/pdf', [ReportController::class, 'exportPdf'])->name('reports.export.pdf');
+
+/*
+|--------------------------------------------------------------------------
+| Portal Karyawan — Login (guest) & Halaman Utama (wajib login)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('guest:employee')->group(function () {
+    Route::get('/portal/login', [EmployeeAuthController::class, 'showLoginForm'])->name('portal.login');
+    Route::post('/portal/login', [EmployeeAuthController::class, 'login'])->name('portal.login.submit');
+});
+
+Route::middleware('auth:employee')->group(function () {
+    Route::get('/portal', [EmployeePortalController::class, 'index'])->name('portal.index');
+    Route::get('/portal/materials/{material}/download', [EmployeePortalController::class, 'download'])
+        ->name('portal.materials.download');
+    Route::post('/portal/logout', [EmployeeAuthController::class, 'logout'])->name('portal.logout');
+
+    // Alur Pre-Test -> Materi -> Post-Test
+    Route::get('/portal/modules/{training_module}', [PortalTestController::class, 'show'])
+        ->name('portal.modules.show');
+    Route::post('/portal/modules/{training_module}/pretest', [PortalTestController::class, 'submitPretest'])
+        ->name('portal.modules.pretest');
+    Route::post('/portal/modules/{training_module}/material-confirm', [PortalTestController::class, 'confirmMaterial'])
+        ->name('portal.modules.material-confirm');
+    Route::post('/portal/modules/{training_module}/posttest', [PortalTestController::class, 'submitPosttest'])
+        ->name('portal.modules.posttest');
+});
 ```
+
+> **Catatan:** guard `employee` (`guest:employee` / `auth:employee` di atas)
+> baru berfungsi kalau `config/auth.php` sudah ditambahkan guard & provider-nya
+> — lihat bagian **23.b** di bawah kalau belum.
+
 
 ## 3b. Jalankan Seeder Master Training & Departemen
 
@@ -399,33 +472,10 @@ lain yang mungkin sudah ada). Tambahkan manual 2 blok ini:
 ],
 ```
 
-### c. Tambahkan Route (routes/web.php)
-
-```php
-use App\Http\Controllers\EmployeeAuthController;
-use App\Http\Controllers\EmployeePortalController;
-use App\Http\Controllers\TrainingMaterialController;
-
-// Login Portal Karyawan (guest — belum login)
-Route::middleware('guest:employee')->group(function () {
-    Route::get('/portal/login', [EmployeeAuthController::class, 'showLoginForm'])->name('portal.login');
-    Route::post('/portal/login', [EmployeeAuthController::class, 'login'])->name('portal.login.submit');
-});
-
-// Halaman Portal (WAJIB login sebagai employee)
-Route::middleware('auth:employee')->group(function () {
-    Route::get('/portal', [EmployeePortalController::class, 'index'])->name('portal.index');
-    Route::get('/portal/materials/{material}/download', [EmployeePortalController::class, 'download'])
-        ->name('portal.materials.download');
-    Route::post('/portal/logout', [EmployeeAuthController::class, 'logout'])->name('portal.logout');
-});
-
-// Upload/hapus materi (sisi HR — di halaman Edit Master Training)
-Route::post('training-modules/{training_module}/materials', [TrainingMaterialController::class, 'store'])
-    ->name('training-modules.materials.store');
-Route::delete('training-modules/{training_module}/materials/{material}', [TrainingMaterialController::class, 'destroy'])
-    ->name('training-modules.materials.destroy');
-```
+### c. Route
+Semua route Portal Karyawan + Materi sudah termasuk di blok lengkap
+**bagian 3** di atas (grup `guest:employee` dan `auth:employee`) — tidak
+perlu ditambah lagi terpisah di sini.
 
 ### d. Cara HRD Memberi Akses Karyawan
 Buka **Data Karyawan → Edit** karyawan yang bersangkutan, isi field **"Password
@@ -607,34 +657,10 @@ Menambahkan tabel `training_module_questions` (bank soal), tabel
 `employee_module_progress` (progres tiap karyawan per modul), dan kolom
 `passing_score` di `training_modules` (default 70).
 
-### b. Tambahkan Route (routes/web.php)
-
-```php
-use App\Http\Controllers\TrainingModuleQuestionController;
-use App\Http\Controllers\PortalTestController;
-
-// Sisi HR — kelola bank soal (di halaman Edit Master Training)
-Route::post('training-modules/{training_module}/questions', [TrainingModuleQuestionController::class, 'store'])
-    ->name('training-modules.questions.store');
-Route::put('training-modules/{training_module}/questions/{question}', [TrainingModuleQuestionController::class, 'update'])
-    ->name('training-modules.questions.update');
-Route::delete('training-modules/{training_module}/questions/{question}', [TrainingModuleQuestionController::class, 'destroy'])
-    ->name('training-modules.questions.destroy');
-
-// Sisi Karyawan — WAJIB login (taruh di dalam group Route::middleware('auth:employee') yang sudah ada)
-Route::middleware('auth:employee')->group(function () {
-    // ... route portal yang sudah ada (portal.index, portal.materials.download, portal.logout) ...
-
-    Route::get('/portal/modules/{training_module}', [PortalTestController::class, 'show'])
-        ->name('portal.modules.show');
-    Route::post('/portal/modules/{training_module}/pretest', [PortalTestController::class, 'submitPretest'])
-        ->name('portal.modules.pretest');
-    Route::post('/portal/modules/{training_module}/material-confirm', [PortalTestController::class, 'confirmMaterial'])
-        ->name('portal.modules.material-confirm');
-    Route::post('/portal/modules/{training_module}/posttest', [PortalTestController::class, 'submitPosttest'])
-        ->name('portal.modules.posttest');
-});
-```
+### b. Route
+Semua route Bank Soal (`training-modules.questions.*`) dan alur test
+(`portal.modules.*`) sudah termasuk di blok lengkap **bagian 3** di atas —
+tidak perlu ditambah lagi terpisah di sini.
 
 ### c. Cara Kerja Alurnya
 1. **HR** buka **Master Training → Edit** modul yang bersangkutan → scroll ke
