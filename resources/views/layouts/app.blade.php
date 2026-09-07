@@ -227,19 +227,8 @@
                 <h1>@yield('page-title', 'ETMS')</h1>
                 <p>@yield('page-subtitle')</p>
             </div>
-            <div class="topbar-actions d-flex align-items-center gap-3">
+            <div class="topbar-actions d-flex gap-2">
                 @yield('page-actions')
-                @auth
-                    <div class="d-flex align-items-center gap-2 ms-2 ps-2 border-start">
-                        <span class="text-muted small">{{ auth()->user()->name }}</span>
-                        <form action="{{ route('logout') }}" method="POST">
-                            @csrf
-                            <button type="submit" class="btn btn-outline-secondary btn-sm">
-                                <i class="bi bi-box-arrow-right"></i> Keluar
-                            </button>
-                        </form>
-                    </div>
-                @endauth
             </div>
         </header>
 

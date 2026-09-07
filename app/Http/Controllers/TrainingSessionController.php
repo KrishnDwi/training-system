@@ -6,15 +6,12 @@ use App\Http\Requests\StoreTrainingSessionRequest;
 use App\Models\Department;
 use App\Models\TrainingModule;
 use App\Models\TrainingSession;
-use App\Services\TrainingMaterialService;
 use App\Services\TrainingSessionService;
 
 class TrainingSessionController extends Controller
 {
-    public function __construct(
-        protected TrainingSessionService $trainingSessionService,
-        protected TrainingMaterialService $trainingMaterialService,
-    ) {
+    public function __construct(protected TrainingSessionService $trainingSessionService)
+    {
     }
 
     public function index()
