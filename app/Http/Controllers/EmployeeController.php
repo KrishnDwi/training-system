@@ -42,7 +42,7 @@ class EmployeeController extends Controller
         $employees = $query->orderBy('name')->get()->map(function ($employee) {
             return [
                 'id' => $employee->id,
-                'nik' => $employee->nik,
+                'employee_number' => $employee->employee_number,
                 'name' => $employee->name,
                 'department' => $employee->department->name,
                 'position' => $employee->position,

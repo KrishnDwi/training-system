@@ -33,20 +33,31 @@
     </div>
 
     <div class="col-md-3">
-        <label class="form-label">Durasi Standar (jam)</label>
-        <input type="number" step="0.5" name="standard_duration_hours"
-               class="form-control @error('standard_duration_hours') is-invalid @enderror"
-               value="{{ old('standard_duration_hours', $trainingModule->standard_duration_hours ?? '') }}">
-        @error('standard_duration_hours') <div class="invalid-feedback">{{ $message }}</div> @enderror
+        <label class="form-label">Durasi Standar (menit)</label>
+        <input type="number" step="5" name="standard_duration_minutes"
+               class="form-control @error('standard_duration_minutes') is-invalid @enderror"
+               value="{{ old('standard_duration_minutes', $trainingModule->standard_duration_minutes ?? '') }}"
+               placeholder="mis. 120">
+        @error('standard_duration_minutes') <div class="invalid-feedback">{{ $message }}</div> @enderror
     </div>
 
     <div class="col-md-3">
-        <label class="form-label">Masa Berlaku (bulan)</label>
+        <label class="form-label">Diulang Setiap (bulan)</label>
         <input type="number" name="validity_months"
                class="form-control @error('validity_months') is-invalid @enderror"
                value="{{ old('validity_months', $trainingModule->validity_months ?? '') }}"
-               placeholder="Kosongkan jika tidak ada masa berlaku">
+               placeholder="mis. 12">
+        <small class="text-muted">Kosongkan jika training ini cukup sekali saja (tidak perlu diulang berkala)</small>
         @error('validity_months') <div class="invalid-feedback">{{ $message }}</div> @enderror
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label">Nilai Minimum Lulus Post-Test</label>
+        <input type="number" name="passing_score" min="0" max="100"
+               class="form-control @error('passing_score') is-invalid @enderror"
+               value="{{ old('passing_score', $trainingModule->passing_score ?? 70) }}">
+        <small class="text-muted">Berlaku kalau modul ini punya soal pre/post-test</small>
+        @error('passing_score') <div class="invalid-feedback">{{ $message }}</div> @enderror
     </div>
 
     <div class="col-md-3">
@@ -66,7 +77,9 @@
     </div>
 </div>
 
+@unless($hideSubmit ?? false)
 <div class="mt-4">
     <button type="submit" class="btn btn-primary">Simpan</button>
     <a href="{{ route('training-modules.index') }}" class="btn btn-outline-secondary">Batal</a>
 </div>
+@endunless

@@ -33,16 +33,61 @@ class TrainingModuleController extends Controller
 
     public function store(StoreTrainingModuleRequest $request)
     {
-        TrainingModule::create($request->validated());
+        $validated = $request->validated();
+        unset($validated['materials']); // ditangani terpisah, bukan kolom di training_modules
+
+        $trainingModule = TrainingModule::create($validated);
+
+        $materialCount = $this->storeUploadedMaterials($request, $trainingModule);
+
+        $message = 'Modul training baru berhasil ditambahkan.';
+        if ($materialCount > 0) {
+            $message .= " {$materialCount} materi ikut diupload.";
+        }
 
         return redirect()
             ->route('training-modules.index')
-            ->with('success', 'Modul training baru berhasil ditambahkan.');
+            ->with('success', $message);
+    }
+
+    /**
+     * Simpan file materi yang diupload bersamaan saat create modul baru.
+     * Judul otomatis dari nama file (tanpa ekstensi) — bisa diganti nanti
+     * lewat halaman Edit kalau HRD mau judul yang lebih rapi.
+     *
+     * File disimpan di disk 'local' (privat) — konsisten dengan
+     * TrainingMaterialController::store(), supaya cara aksesnya sama
+     * (harus login lewat Portal Karyawan, tidak ada URL publik langsung).
+     */
+    protected function storeUploadedMaterials(StoreTrainingModuleRequest $request, TrainingModule $trainingModule): int
+    {
+        $files = $request->file('materials', []);
+        $count = 0;
+
+        foreach ($files as $file) {
+            if (!$file) {
+                continue;
+            }
+
+            $path = $file->store('training-materials', 'local');
+
+            $trainingModule->materials()->create([
+                'title' => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
+                'file_path' => $path,
+                'original_filename' => $file->getClientOriginalName(),
+                'mime_type' => $file->getClientMimeType(),
+                'file_size' => $file->getSize(),
+            ]);
+
+            $count++;
+        }
+
+        return $count;
     }
 
     public function edit(TrainingModule $trainingModule)
     {
-        $trainingModule->load('materials');
+        $trainingModule->load('materials', 'questions');
 
         return view('training-modules.edit', compact('trainingModule'));
     }

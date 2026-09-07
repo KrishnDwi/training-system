@@ -19,7 +19,7 @@ class EmployeeAuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'nik' => ['required', 'string'],
+            'employee_number' => ['required', 'string'],
             'password' => ['required', 'string'],
         ]);
 
@@ -28,15 +28,15 @@ class EmployeeAuthController extends Controller
         // pengecekan manual terpisah (Laravel menambahkan semua key selain
         // 'password' sebagai kondisi WHERE saat mencari user).
         $attempted = Auth::guard('employee')->attempt([
-            'nik' => $credentials['nik'],
+            'employee_number' => $credentials['employee_number'],
             'password' => $credentials['password'],
             'employment_status' => 'active',
         ], $request->boolean('remember'));
 
         if (!$attempted) {
             return back()
-                ->withErrors(['nik' => 'ID No. atau password salah, atau akun belum aktif/tersedia. Hubungi HRD kalau belum punya akses.'])
-                ->onlyInput('nik');
+                ->withErrors(['employee_number' => 'Nomor Karyawan atau password salah, atau akun belum aktif/tersedia. Hubungi HRD kalau belum punya akses.'])
+                ->onlyInput('employee_number');
         }
 
         $request->session()->regenerate();

@@ -19,7 +19,7 @@ class StoreTrainingSessionRequest extends FormRequest
             'session_date' => ['required', 'date'],
             'start_time' => ['required', 'date_format:H:i'],
             'end_time' => ['required', 'date_format:H:i', 'after:start_time'],
-            'actual_duration_hours' => ['nullable', 'numeric', 'min:0.5', 'max:24'],
+            'actual_duration_minutes' => ['nullable', 'integer', 'min:5', 'max:1440'],
             'location' => ['nullable', 'string', 'max:150'],
             'notes' => ['nullable', 'string'],
 

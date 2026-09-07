@@ -75,3 +75,28 @@ Route::post('training-modules/{training_module}/materials', [TrainingMaterialCon
     ->name('training-modules.materials.store');
 Route::delete('training-modules/{training_module}/materials/{material}', [TrainingMaterialController::class, 'destroy'])
     ->name('training-modules.materials.destroy');
+
+use App\Http\Controllers\TrainingModuleQuestionController;
+use App\Http\Controllers\PortalTestController;
+
+// Sisi HR — kelola bank soal (di halaman Edit Master Training)
+Route::post('training-modules/{training_module}/questions', [TrainingModuleQuestionController::class, 'store'])
+    ->name('training-modules.questions.store');
+Route::put('training-modules/{training_module}/questions/{question}', [TrainingModuleQuestionController::class, 'update'])
+    ->name('training-modules.questions.update');
+Route::delete('training-modules/{training_module}/questions/{question}', [TrainingModuleQuestionController::class, 'destroy'])
+    ->name('training-modules.questions.destroy');
+
+// Sisi Karyawan — WAJIB login (taruh di dalam group Route::middleware('auth:employee') yang sudah ada)
+Route::middleware('auth:employee')->group(function () {
+    // ... route portal yang sudah ada (portal.index, portal.materials.download, portal.logout) ...
+
+    Route::get('/portal/modules/{training_module}', [PortalTestController::class, 'show'])
+        ->name('portal.modules.show');
+    Route::post('/portal/modules/{training_module}/pretest', [PortalTestController::class, 'submitPretest'])
+        ->name('portal.modules.pretest');
+    Route::post('/portal/modules/{training_module}/material-confirm', [PortalTestController::class, 'confirmMaterial'])
+        ->name('portal.modules.material-confirm');
+    Route::post('/portal/modules/{training_module}/posttest', [PortalTestController::class, 'submitPosttest'])
+        ->name('portal.modules.posttest');
+});

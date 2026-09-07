@@ -19,7 +19,7 @@
     <div class="content-card-body">
         <div class="row">
             <div class="col-md-4">
-                <p class="mb-2"><strong>ID No.:</strong> {{ $employee->nik }}</p>
+                <p class="mb-2"><strong>Nomor Karyawan:</strong> {{ $employee->employee_number }}</p>
                 <p class="mb-2"><strong>Departemen:</strong> {{ $employee->department->name }}</p>
                 <p class="mb-0"><strong>Jabatan:</strong> {{ $employee->position ?? '-' }}</p>
             </div>
@@ -180,7 +180,7 @@
     </div>
     <div class="content-card-body p-0">
         <table class="table mb-0">
-            <thead><tr><th class="ps-4">Modul Training</th><th>Kategori</th><th class="pe-4">Masa Berlaku</th></tr></thead>
+            <thead><tr><th class="ps-4">Modul Training</th><th>Kategori</th><th class="pe-4">Diulang Setiap</th></tr></thead>
             <tbody>
                 @forelse($missingMandatoryModules as $module)
                     <tr>
@@ -201,7 +201,7 @@
     <div class="content-card-header">Riwayat Training ({{ $trainingHistories->count() }} record)</div>
     <div class="content-card-body p-0">
         <table class="table mb-0 align-middle">
-            <thead><tr><th class="ps-4">Training</th><th>Mandatory</th><th>Tanggal</th><th>Trainer</th><th>Expired</th><th class="pe-4">Status</th></tr></thead>
+            <thead><tr><th class="ps-4">Training</th><th>Mandatory</th><th>Tanggal</th><th>Trainer</th><th>Jadwal Ulang</th><th class="pe-4">Status</th></tr></thead>
             <tbody>
                 @forelse($trainingHistories as $history)
                     <tr>
@@ -213,7 +213,7 @@
                         <td class="pe-4">
                             @php
                                 $hBadge = ['valid'=>'bg-success','expiring_soon'=>'bg-warning','expired'=>'bg-danger','no_expiry'=>'bg-secondary'];
-                                $hLabel = ['valid'=>'Valid','expiring_soon'=>'Akan Expired','expired'=>'Expired','no_expiry'=>'Tanpa Masa Berlaku'];
+                                $hLabel = ['valid'=>'Belum Waktunya','expiring_soon'=>'Segera Waktunya','expired'=>'Sudah Waktunya Diulang','no_expiry'=>'Sekali Saja'];
                             @endphp
                             <span class="badge {{ $hBadge[$history->status] }}">{{ $hLabel[$history->status] }}</span>
                         </td>

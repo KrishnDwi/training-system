@@ -19,7 +19,7 @@ class Employee extends Authenticatable
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'nik',
+        'employee_number',
         'name',
         'department_id',
         'position',

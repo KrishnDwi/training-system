@@ -3,11 +3,11 @@
 <h6 class="text-primary border-bottom pb-2 mb-3">Identitas & Pekerjaan</h6>
 <div class="row g-3 mb-4">
     <div class="col-md-3">
-        <label class="form-label">ID No. / NIK Karyawan <span class="text-danger">*</span></label>
-        <input type="text" name="nik" class="form-control @error('nik') is-invalid @enderror"
-               value="{{ old('nik', $employee->nik ?? '') }}" required>
-        <small class="text-muted">Nomor badge/ID internal — BUKAN NIK KTP</small>
-        @error('nik') <div class="invalid-feedback">{{ $message }}</div> @enderror
+        <label class="form-label">Nomor Karyawan <span class="text-danger">*</span></label>
+        <input type="text" name="employee_number" class="form-control @error('employee_number') is-invalid @enderror"
+               value="{{ old('employee_number', $employee->employee_number ?? '') }}" required>
+        <small class="text-muted">Nomor badge/ID internal (ID No.) — BUKAN NIK KTP</small>
+        @error('employee_number') <div class="invalid-feedback">{{ $message }}</div> @enderror
     </div>
     <div class="col-md-6">
         <label class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
@@ -190,7 +190,7 @@
         <label class="form-label">Password Login Portal</label>
         <input type="password" name="password" class="form-control @error('password') is-invalid @enderror"
                placeholder="{{ isset($employee) && $employee->password ? 'Sudah punya password — kosongkan jika tidak ingin diubah' : 'Belum punya akses login — isi untuk mengaktifkan' }}">
-        <small class="text-muted">Karyawan login pakai <strong>ID No.</strong> + password ini untuk akses Portal Materi Training.</small>
+        <small class="text-muted">Karyawan login pakai <strong>Nomor Karyawan</strong> + password ini untuk akses Portal Materi Training.</small>
         @error('password') <div class="invalid-feedback">{{ $message }}</div> @enderror
     </div>
 </div>

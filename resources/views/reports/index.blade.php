@@ -85,16 +85,16 @@
     </div>
     <div class="col-md-3">
         <div class="stat-card" style="border-color:#fde68a;">
-            <div class="stat-title">Akan Expired</div>
+            <div class="stat-title">Segera Perlu Diulang</div>
             <div class="stat-value" style="color:#d97706;">{{ $summary['expiring_soon'] }}</div>
             <div class="stat-caption">≤ 30 hari lagi</div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="stat-card accent-red">
-            <div class="stat-title">Sudah Expired</div>
+            <div class="stat-title">Sudah Waktunya Diulang</div>
             <div class="stat-value">{{ $summary['expired'] }}</div>
-            <div class="stat-caption">Sudah lewat masa berlaku</div>
+            <div class="stat-caption">Sudah lewat jadwal pengulangan</div>
         </div>
     </div>
 </div>
@@ -110,14 +110,14 @@
                     <th>Mandatory</th>
                     <th>Tanggal</th>
                     <th>Trainer</th>
-                    <th>Expired</th>
+                    <th>Jadwal Ulang</th>
                     <th>Status</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($histories as $history)
                     <tr>
-                        <td>{{ $history->employee->name }}<br><small class="text-muted">{{ $history->employee->nik }}</small></td>
+                        <td>{{ $history->employee->name }}<br><small class="text-muted">{{ $history->employee->employee_number }}</small></td>
                         <td>{{ $history->employee->department->name }}</td>
                         <td>{{ $history->training_name_snapshot }}</td>
                         <td>
@@ -139,10 +139,10 @@
                                     'no_expiry' => 'bg-secondary',
                                 ];
                                 $statusLabel = [
-                                    'valid' => 'Valid',
-                                    'expiring_soon' => 'Akan Expired',
-                                    'expired' => 'Expired',
-                                    'no_expiry' => 'Tanpa Masa Berlaku',
+                                    'valid' => 'Belum Waktunya',
+                                    'expiring_soon' => 'Segera Waktunya',
+                                    'expired' => 'Sudah Waktunya Diulang',
+                                    'no_expiry' => 'Sekali Saja',
                                 ];
                             @endphp
                             <span class="badge {{ $statusBadge[$history->status] }}">{{ $statusLabel[$history->status] }}</span>

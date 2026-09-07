@@ -35,7 +35,25 @@
                     @endif
                 </div>
                 <div class="content-card-body">
-                    @if($module->materials->isEmpty())
+                    @if($module->questions_count > 0)
+                        @php $progress = $progressByModule->get($module->id); @endphp
+                        @php
+                            $stage = $progress?->stage ?? 'pretest';
+                            $stageLabel = [
+                                'pretest' => ['Belum Mulai — Pre-Test dulu', 'bg-secondary'],
+                                'material' => ['Sedang Baca Materi', 'bg-info'],
+                                'posttest' => ['Perlu Post-Test', 'bg-warning'],
+                                'completed' => ['Selesai ✅', 'bg-success'],
+                            ][$stage];
+                        @endphp
+                        <p class="mb-2">
+                            <span class="badge {{ $stageLabel[1] }}">{{ $stageLabel[0] }}</span>
+                            <span class="text-muted small ms-1">{{ $module->questions_count }} soal test</span>
+                        </p>
+                        <a href="{{ route('portal.modules.show', $module) }}" class="btn btn-sm btn-primary">
+                            {{ $stage === 'completed' ? 'Lihat Hasil' : 'Lanjutkan' }}
+                        </a>
+                    @elseif($module->materials->isEmpty())
                         <p class="text-muted small mb-0">Belum ada materi diupload untuk modul ini.</p>
                     @else
                         <ul class="list-unstyled mb-0">

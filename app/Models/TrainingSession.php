@@ -17,7 +17,7 @@ class TrainingSession extends Model
         'session_date',
         'start_time',
         'end_time',
-        'actual_duration_hours',
+        'actual_duration_minutes',
         'location',
         'notes',
     ];

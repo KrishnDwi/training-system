@@ -19,8 +19,8 @@
                 <form action="{{ route('portal.login.submit') }}" method="POST">
                     @csrf
                     <div class="mb-3">
-                        <label class="form-label">ID No.</label>
-                        <input type="text" name="nik" class="form-control" value="{{ old('nik') }}" required autofocus>
+                        <label class="form-label">Nomor Karyawan</label>
+                        <input type="text" name="employee_number" class="form-control" value="{{ old('employee_number') }}" required autofocus>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Password</label>

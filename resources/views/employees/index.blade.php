@@ -66,7 +66,7 @@
         <table id="table-employees" class="table table-hover w-100">
             <thead>
                 <tr>
-                    <th>NIK</th>
+                    <th>Nomor Karyawan</th>
                     <th>Nama</th>
                     <th>Departemen</th>
                     <th>Jabatan</th>
@@ -94,7 +94,7 @@ $(function () {
             }
         },
         columns: [
-            { data: 'nik' },
+            { data: 'employee_number' },
             { data: 'name' },
             { data: 'department' },
             { data: 'position', defaultContent: '-' },

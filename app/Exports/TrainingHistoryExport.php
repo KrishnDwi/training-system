@@ -25,7 +25,7 @@ class TrainingHistoryExport implements FromQuery, WithHeadings, WithMapping, Sho
     public function headings(): array
     {
         return [
-            'NIK',
+            'Nomor Karyawan',
             'Nama Karyawan',
             'Departemen',
             'Jabatan',
@@ -34,8 +34,8 @@ class TrainingHistoryExport implements FromQuery, WithHeadings, WithMapping, Sho
             'Mandatory',
             'Tanggal Training',
             'Trainer',
-            'Durasi (jam)',
-            'Tanggal Expired',
+            'Durasi (menit)',
+            'Jadwal Ulang Berikutnya',
             'Status',
         ];
     }
@@ -43,7 +43,7 @@ class TrainingHistoryExport implements FromQuery, WithHeadings, WithMapping, Sho
     public function map($history): array
     {
         return [
-            $history->employee->nik,
+            $history->employee->employee_number,
             $history->employee->name,
             $history->employee->department->name,
             $history->employee->position,
@@ -52,13 +52,13 @@ class TrainingHistoryExport implements FromQuery, WithHeadings, WithMapping, Sho
             $history->is_mandatory_snapshot ? 'Ya' : 'Tidak',
             $history->training_date->format('d/m/Y'),
             $history->trainer_name_snapshot,
-            $history->duration_hours_snapshot,
+            $history->duration_minutes_snapshot,
             $history->expired_at?->format('d/m/Y') ?? '-',
             match ($history->status) {
-                'expired' => 'Expired',
-                'expiring_soon' => 'Akan Expired',
-                'valid' => 'Valid',
-                default => 'Tidak Ada Masa Berlaku',
+                'expired' => 'Sudah Waktunya Diulang',
+                'expiring_soon' => 'Segera Waktunya',
+                'valid' => 'Belum Waktunya',
+                default => 'Sekali Saja',
             },
         ];
     }

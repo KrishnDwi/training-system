@@ -13,7 +13,7 @@
             <code>Staff</code>, <code>DW</code>, <code>Casual</code>, <code>Training</code>, <code>Outsourcing</code>.
 
             <ul class="mb-0 mt-2">
-                <li>Kolom yang diambil dari tiap sheet: <strong>ID No./NIK</strong>, <strong>Full Name</strong>,
+                <li>Kolom yang diambil dari tiap sheet: <strong>ID No. (Nomor Karyawan)</strong>, <strong>Full Name</strong>,
                     <strong>Department</strong>, <strong>Current Position</strong>, <strong>Joining Date Hotel</strong>,
                     <strong>Employee Status</strong>, <strong>Mobile/HP Number</strong>, <strong>Email</strong>.
                     Kolom lain (NPWP, BPJS, rekening, kontrak, data keluarga, dll) <strong>tidak diimpor</strong>
@@ -23,7 +23,7 @@
                     di sistem — bukan sekadar kolom data karyawan.</li>
                 <li>Kategori pekerja (Staff/DW/Casual/Trainee/Outsourcing) otomatis ditentukan dari
                     nama sheet asal data.</li>
-                <li>Import berdasarkan <strong>NIK/ID No.</strong> — data yang sudah ada akan di-<strong>update</strong>,
+                <li>Import berdasarkan <strong>Nomor Karyawan (ID No.)</strong> — data yang sudah ada akan di-<strong>update</strong>,
                     bukan duplikat.</li>
             </ul>
         </div>

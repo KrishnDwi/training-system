@@ -72,4 +72,71 @@
         </form>
     </div>
 </div>
+
+{{-- ===== Bank Soal Pre-Test / Post-Test ===== --}}
+<div class="content-card mt-3">
+    <div class="content-card-header d-flex justify-content-between align-items-center">
+        <span>Bank Soal Pre-Test / Post-Test</span>
+        <span class="badge bg-secondary">{{ $trainingModule->questions->count() }} soal</span>
+    </div>
+    <div class="content-card-body">
+        <p class="text-muted small">
+            Soal yang sama dipakai untuk pre-test DAN post-test (supaya bisa mengukur
+            peningkatan skor). Kalau modul ini punya minimal 1 soal, karyawan di Portal
+            akan diarahkan lewat alur <strong>Pre-Test → Baca Materi → Post-Test</strong>
+            sebelum training ini tercatat selesai. Kalau tidak ada soal sama sekali,
+            karyawan cukup langsung bisa download materi seperti biasa (tanpa test).
+        </p>
+
+        @forelse($trainingModule->questions as $question)
+            <div class="border rounded p-3 mb-2">
+                <div class="d-flex justify-content-between align-items-start">
+                    <strong>{{ $loop->iteration }}. {{ $question->question_text }}</strong>
+                    <form action="{{ route('training-modules.questions.destroy', [$trainingModule, $question]) }}" method="POST" onsubmit="return confirm('Hapus soal ini?')">
+                        @csrf @method('DELETE')
+                        <button class="btn btn-sm btn-outline-danger">Hapus</button>
+                    </form>
+                </div>
+                <ul class="list-unstyled mt-2 mb-0 small">
+                    @foreach(['a','b','c','d'] as $opt)
+                        <li class="{{ $question->correct_option === $opt ? 'text-success fw-semibold' : '' }}">
+                            {{ strtoupper($opt) }}. {{ $question->{'option_'.$opt} }}
+                            @if($question->correct_option === $opt) <i class="bi bi-check-circle-fill"></i> @endif
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        @empty
+            <p class="text-muted small">Belum ada soal.</p>
+        @endforelse
+
+        <hr>
+        <h6 class="small text-primary">Tambah Soal Baru</h6>
+        <form action="{{ route('training-modules.questions.store', $trainingModule) }}" method="POST">
+            @csrf
+            <div class="mb-2">
+                <label class="form-label small">Pertanyaan</label>
+                <textarea name="question_text" rows="2" class="form-control form-control-sm" required></textarea>
+            </div>
+            <div class="row g-2">
+                @foreach(['a','b','c','d'] as $opt)
+                    <div class="col-md-6">
+                        <label class="form-label small">Opsi {{ strtoupper($opt) }}</label>
+                        <input type="text" name="option_{{ $opt }}" class="form-control form-control-sm" required>
+                    </div>
+                @endforeach
+            </div>
+            <div class="mt-2" style="max-width: 220px;">
+                <label class="form-label small">Jawaban Benar</label>
+                <select name="correct_option" class="form-select form-select-sm" required>
+                    <option value="a">A</option>
+                    <option value="b">B</option>
+                    <option value="c">C</option>
+                    <option value="d">D</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-sm btn-primary mt-3">Tambah Soal</button>
+        </form>
+    </div>
+</div>
 @endsection

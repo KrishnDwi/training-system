@@ -15,8 +15,9 @@ class TrainingModule extends Model
         'name',
         'category',
         'is_mandatory',
-        'standard_duration_hours',
+        'standard_duration_minutes',
         'validity_months',
+        'passing_score',
         'description',
         'is_active',
     ];
@@ -34,6 +35,16 @@ class TrainingModule extends Model
     public function materials(): HasMany
     {
         return $this->hasMany(TrainingMaterial::class);
+    }
+
+    public function questions(): HasMany
+    {
+        return $this->hasMany(TrainingModuleQuestion::class)->orderBy('order_index');
+    }
+
+    public function employeeProgress(): HasMany
+    {
+        return $this->hasMany(EmployeeModuleProgress::class);
     }
 
     public function histories(): HasMany

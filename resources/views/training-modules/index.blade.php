@@ -20,7 +20,7 @@
                     <th>Nama Training</th>
                     <th>Kategori</th>
                     <th>Mandatory</th>
-                    <th>Masa Berlaku</th>
+                    <th>Diulang Setiap</th>
                     <th>Status</th>
                     <th>Aksi</th>
                 </tr>

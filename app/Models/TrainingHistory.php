@@ -20,7 +20,7 @@ class TrainingHistory extends Model
         'is_mandatory_snapshot',
         'trainer_name_snapshot',
         'training_date',
-        'duration_hours_snapshot',
+        'duration_minutes_snapshot',
         'validity_months_snapshot',
         'expired_at',
     ];
@@ -49,6 +49,13 @@ class TrainingHistory extends Model
     /**
      * Status dihitung dinamis (bukan kolom statis), agar selalu akurat
      * tanpa perlu cron job untuk sinkronisasi.
+     *
+     * CATATAN PENAMAAN: nilai kode di bawah ('expired', dst) TETAP dipakai
+     * secara internal untuk konsistensi kode, TAPI di seluruh tampilan
+     * (Blade view) sengaja ditampilkan dengan istilah "pengingat jadwal
+     * pengulangan" (mis. "Sudah Waktunya Diulang"), BUKAN "expired/kadaluarsa"
+     * — sesuai keinginan Anda supaya kesannya bukan dokumen legal yang jadi
+     * tidak sah, melainkan pengingat training berkala (seperti servis rutin).
      *
      * Nilai: 'no_expiry' | 'valid' | 'expiring_soon' | 'expired'
      */

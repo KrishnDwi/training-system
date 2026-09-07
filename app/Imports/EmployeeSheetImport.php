@@ -165,7 +165,7 @@ class EmployeeSheetImport implements ToCollection
         $email = $this->findValue($data, ['email']);
 
         $employee = Employee::updateOrCreate(
-            ['nik' => trim((string) $employeeIdNo)],
+            ['employee_number' => trim((string) $employeeIdNo)],
             [
                 'name' => trim($name),
                 'department_id' => $department->id,
@@ -443,7 +443,7 @@ class EmployeeSheetImport implements ToCollection
                 'training_name_snapshot' => $module->name,
                 'is_mandatory_snapshot' => $module->is_mandatory,
                 'trainer_name_snapshot' => 'Sertifikasi Eksternal (Import Excel)',
-                'duration_hours_snapshot' => $module->standard_duration_hours,
+                'duration_minutes_snapshot' => $module->standard_duration_minutes,
                 'validity_months_snapshot' => $module->validity_months,
                 'expired_at' => $expiredAt,
             ]

@@ -18,7 +18,7 @@ class UpdateEmployeeRequest extends FormRequest
 
         return [
             // Identitas dasar
-            'nik' => ['required', 'string', 'max:30', Rule::unique('employees', 'nik')->ignore($employeeId)],
+            'employee_number' => ['required', 'string', 'max:30', Rule::unique('employees', 'employee_number')->ignore($employeeId)],
             'name' => ['required', 'string', 'max:150'],
             'department_id' => ['required', 'exists:departments,id'],
             'position' => ['nullable', 'string', 'max:100'],

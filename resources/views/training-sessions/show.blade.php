@@ -39,7 +39,7 @@
         <table class="table mb-0">
             <thead>
                 <tr>
-                    <th class="ps-4">NIK</th>
+                    <th class="ps-4">Nomor Karyawan</th>
                     <th>Nama</th>
                     <th>Departemen</th>
                     <th class="pe-4">Status Kehadiran</th>
@@ -48,7 +48,7 @@
             <tbody>
                 @foreach($trainingSession->participants as $participant)
                     <tr>
-                        <td class="ps-4">{{ $participant->employee->nik }}</td>
+                        <td class="ps-4">{{ $participant->employee->employee_number }}</td>
                         <td>{{ $participant->employee->name }}</td>
                         <td>{{ $participant->employee->department->name }}</td>
                         <td class="pe-4">

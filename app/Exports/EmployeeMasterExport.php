@@ -33,7 +33,7 @@ class EmployeeMasterExport implements FromQuery, WithHeadings, WithMapping, Shou
     public function headings(): array
     {
         return [
-            'ID No.', 'Nama', 'Departemen', 'Jabatan', 'Kategori Pekerja', 'Status',
+            'Nomor Karyawan', 'Nama', 'Departemen', 'Jabatan', 'Kategori Pekerja', 'Status',
             'Tanggal Masuk', 'Email', 'No. Telepon',
             'Tempat Lahir', 'Tanggal Lahir', 'Usia', 'Gender', 'Agama', 'Golongan Darah',
             'Status Pernikahan (Pajak)', 'Level', 'Alamat', 'Daerah', 'Jatah Cuti/Tahun',
@@ -50,7 +50,7 @@ class EmployeeMasterExport implements FromQuery, WithHeadings, WithMapping, Shou
             ?? $employee->contracts->sortByDesc('sequence')->first();
 
         return [
-            $employee->nik,
+            $employee->employee_number,
             $employee->name,
             $employee->department->name,
             $employee->position,

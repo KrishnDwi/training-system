@@ -15,7 +15,7 @@ class StoreEmployeeRequest extends FormRequest
     {
         return [
             // Identitas dasar
-            'nik' => ['required', 'string', 'max:30', 'unique:employees,nik'],
+            'employee_number' => ['required', 'string', 'max:30', 'unique:employees,employee_number'],
             'name' => ['required', 'string', 'max:150'],
             'department_id' => ['required', 'exists:departments,id'],
             'position' => ['nullable', 'string', 'max:100'],

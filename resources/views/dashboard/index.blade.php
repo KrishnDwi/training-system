@@ -55,16 +55,16 @@
     </div>
     <div class="col-md-3">
         <div class="stat-card" style="border-color:#fde68a;">
-            <div class="stat-title">Akan Expired</div>
+            <div class="stat-title">Segera Perlu Diulang</div>
             <div class="stat-value" style="color:#d97706;">{{ $expiringSoonCount }}</div>
-            <div class="stat-caption">Riwayat training ≤ 30 hari lagi</div>
+            <div class="stat-caption">Jadwal pengulangan ≤ 30 hari lagi</div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="stat-card accent-red">
-            <div class="stat-title">Sudah Expired</div>
+            <div class="stat-title">Sudah Waktunya Diulang</div>
             <div class="stat-value">{{ $expiredCount }}</div>
-            <div class="stat-caption">Riwayat training yang kedaluwarsa</div>
+            <div class="stat-caption">Sudah lewat jadwal pengulangan</div>
         </div>
     </div>
 </div>
@@ -79,7 +79,7 @@
                 {{ $mandatoryCompletionPercentage }}%
             </div>
         </div>
-        <small class="text-muted d-block mt-2">Berdasarkan karyawan aktif × modul mandatory aktif yang riwayatnya masih valid (belum expired).</small>
+        <small class="text-muted d-block mt-2">Berdasarkan karyawan aktif × modul mandatory aktif yang riwayatnya masih berlaku (belum waktunya diulang).</small>
     </div>
 </div>
 
@@ -148,8 +148,8 @@
     </div>
 </div>
 <small class="text-muted d-block mt-2">
-    "Perlu training" mencakup: belum pernah ikut sama sekali, sudah expired, atau akan expired
-    sebelum 31 Desember {{ date('Y') }} (meski saat ini statusnya masih valid).
+    "Perlu training" mencakup: belum pernah ikut sama sekali, sudah waktunya diulang, atau
+    akan waktunya diulang sebelum 31 Desember {{ date('Y') }} (meski saat ini belum waktunya).
 </small>
 @endsection
 

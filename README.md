@@ -463,6 +463,213 @@ sendiri tidak bisa masuk ke sisi admin. Kalau ini jadi perhatian keamanan,
 beri tahu saya — bisa saya tambahkan login sederhana untuk HRD juga
 (terpisah dari guard `employee` ini, pakai guard `web` default Laravel).
 
+## 24. Update — Upload Materi Langsung Saat Buat Modul Training Baru ✅
+
+Sebelumnya materi cuma bisa diupload lewat halaman **Edit** (karena butuh
+modul sudah tersimpan dulu). Sekarang halaman **Tambah Modul Training** juga
+punya bagian upload materi — bisa pilih beberapa file sekaligus, langsung
+tersimpan bareng modulnya dalam satu submit.
+
+- Judul materi **otomatis diambil dari nama file** (tanpa ekstensi) — kalau
+  mau judul yang lebih rapi, tinggal edit lagi lewat halaman Edit.
+- Tetap disimpan di disk privat yang sama seperti upload dari halaman Edit
+  (konsisten — harus login Portal Karyawan untuk download).
+- Upload materi bersifat **opsional** — modul tetap bisa dibuat tanpa materi,
+  materi bisa ditambah belakangan kapan saja lewat Edit.
+
+**Tidak perlu migration baru** untuk update ini — cuma perubahan Controller +
+View. Tinggal timpa `TrainingModuleController.php`,
+`StoreTrainingModuleRequest.php`, `training-modules/create.blade.php`, dan
+`training-modules/_form.blade.php`.
+
+## 25. Update — Satuan Durasi Diganti dari Jam ke Menit ✅
+
+Sesuai permintaan Anda, semua field durasi training diganti dari **jam
+(desimal)** ke **menit (bilangan bulat)** — lebih mudah dihitung/diinput
+tanpa perlu pecahan seperti "1.5 jam".
+
+**Field yang berubah:**
+| Sebelumnya | Sekarang |
+|---|---|
+| `training_modules.standard_duration_hours` (desimal) | `standard_duration_minutes` (integer) |
+| `training_sessions.actual_duration_hours` (desimal) | `actual_duration_minutes` (integer) |
+| `training_histories.duration_hours_snapshot` (desimal) | `duration_minutes_snapshot` (integer) |
+
+**Jalankan migration baru** — ini otomatis **mengonversi data yang sudah ada**
+(jam × 60 = menit), BUKAN menghapusnya:
+```bash
+php artisan migrate
+```
+
+Kalau suatu saat perlu dibatalkan (`php artisan migrate:rollback`), migration
+ini juga otomatis mengonversi balik menit → jam, jadi datanya tetap aman.
+
+**Contoh konversi di seeder** (`TrainingModuleSeeder`): "Fire Safety" yang
+tadinya 2 jam sekarang 120 menit, "Manual Handling" yang tadinya 1.5 jam
+sekarang 90 menit, dst — 32 modul contoh semuanya sudah dikonversi.
+
+**Semua tempat yang menampilkan/menginput durasi ikut diperbarui**: form
+Master Training, form Training Session, Export Report Excel, dan proses
+import Excel (untuk riwayat sertifikasi eksternal).
+
+## 26. Update — Istilah "Expired/Masa Berlaku" Diganti Jadi Framing Pengingat ✅
+
+Sesuai masukan Anda, istilah di seluruh tampilan diganti dari kesan "dokumen
+legal yang jadi tidak sah" menjadi **pengingat jadwal pengulangan training**
+(seperti pengingat servis berkala):
+
+| Sebelumnya | Sekarang |
+|---|---|
+| "Masa Berlaku (bulan)" (form modul) | "Diulang Setiap (bulan)" |
+| Badge "Valid" | "Belum Waktunya" |
+| Badge "Akan Expired" | "Segera Waktunya" |
+| Badge "Expired" | "Sudah Waktunya Diulang" |
+| Badge "Tanpa Masa Berlaku" | "Sekali Saja" |
+| Kartu Dashboard/Report "Akan Expired" | "Segera Perlu Diulang" |
+| Kartu Dashboard/Report "Sudah Expired" | "Sudah Waktunya Diulang" |
+| Kolom tabel "Expired" | "Jadwal Ulang" / "Jadwal Ulang Berikutnya" |
+
+**Ini murni perubahan istilah tampilan** — nama kolom database (`expired_at`,
+`validity_months`) dan logika internal (`getStatusAttribute()`, scope
+`expiringSoon()`/`expired()`) **sengaja TIDAK diubah**, supaya tidak perlu
+migration baru dan lebih stabil. Jadi update ini **tidak perlu
+`php artisan migrate`** — cukup timpa file view, Export, dan model
+`TrainingHistory.php` (cuma komentar yang berubah di situ, bukan logika).
+
+Halaman yang terkena update: form & index Master Training, Dashboard, Report
+(halaman + Export Excel + Export PDF), dan halaman Detail Karyawan.
+
+## 27. Update — Istilah "NIK"/"ID No." Diganti Jadi "Nomor Karyawan" ✅
+
+Sesuai permintaan Anda, label field identifier utama karyawan (kolom database
+`nik`, yang sebelumnya ditampilkan sebagai "ID No." atau "NIK Karyawan" di
+berbagai tempat) sekarang konsisten ditampilkan sebagai **"Nomor Karyawan"**
+di seluruh sistem — form Data Karyawan, tabel index, halaman detail, form
+Training Session (pemilihan peserta), halaman detail Training Session,
+Report (Excel & PDF), Export Data Karyawan Lengkap, dan login Portal Karyawan.
+
+**Yang TIDAK diubah (sengaja):**
+- Kolom database tetap bernama `nik` — murni perubahan LABEL tampilan, tidak
+  perlu migration.
+- **"NIK KTP"** (`nik_ktp`) tetap dengan nama itu — ini field yang BENAR-BENAR
+  berbeda (Nomor Induk Kependudukan asli dari KTP), sudah jelas namanya,
+  jadi tidak perlu diganti. Justru penting untuk tetap dibedakan dari
+  "Nomor Karyawan" supaya tidak tertukar lagi seperti sebelumnya.
+- Referensi ke **"ID No."** di `EmployeeSheetImport.php` sengaja dibiarkan —
+  itu nama kolom asli di file Excel HR Anda (dipakai untuk pencocokan kolom
+  saat import), bukan istilah sistem kita.
+
+**Tidak perlu migration** — cukup timpa file view, Export, dan Controller yang
+terkait (semua ada di dalam zip ini).
+
+## 28. Update — Kolom Database `nik` Di-rename Jadi `employee_number` ✅
+
+Melanjutkan update sebelumnya (yang cuma ganti label tampilan), sekarang
+**kolom database-nya juga diganti** sesuai permintaan Anda.
+
+**Jalankan migration baru:**
+```bash
+php artisan migrate
+```
+
+Migration ini otomatis **memindahkan data yang sudah ada** (nilai `nik` disalin
+ke `employee_number`), bukan menghapusnya — pakai pola yang sama seperti
+migration konversi durasi jam→menit sebelumnya (tambah kolom baru → salin data
+→ hapus kolom lama), supaya tidak bergantung ke package `doctrine/dbal` untuk
+rename kolom dan lebih portable di semua driver database.
+
+**Semua kode yang memakai kolom ini ikut diperbarui**, termasuk bagian yang
+KRUSIAL untuk login Portal Karyawan — field login sekarang bernama
+`employee_number` (sebelumnya `nik`), jadi:
+- `EmployeeAuthController` — validasi, `Auth::attempt()`, pesan error
+- Form login Portal Karyawan — `name="employee_number"`
+- `Employee` model — `$fillable`
+- Form Data Karyawan, DataTables index, halaman detail
+- Form Training Session (pemilihan & tabel peserta), detail Training Session
+- Import Excel (`EmployeeSheetImport`) — matching `updateOrCreate`
+- Export Report (Excel & PDF) dan Export Data Karyawan Lengkap
+- `StoreEmployeeRequest`/`UpdateEmployeeRequest` — termasuk validasi unique
+
+**Yang TIDAK berubah:** `nik_ktp` (NIK KTP asli) tetap dengan nama itu — field
+yang genuinely berbeda, sudah dibahas sebelumnya.
+
+⚠️ **Kalau ada karyawan yang sudah pernah login ke Portal sebelum update ini**,
+mereka tetap bisa login normal setelah migration (Nomor Karyawan mereka tidak
+berubah nilainya, cuma nama kolomnya) — tidak perlu reset password.
+
+## 29. Fitur Baru — Alur Pre-Test → Materi → Post-Test per Karyawan ✅
+
+### a. Migration baru
+```bash
+php artisan migrate
+```
+Menambahkan tabel `training_module_questions` (bank soal), tabel
+`employee_module_progress` (progres tiap karyawan per modul), dan kolom
+`passing_score` di `training_modules` (default 70).
+
+### b. Tambahkan Route (routes/web.php)
+
+```php
+use App\Http\Controllers\TrainingModuleQuestionController;
+use App\Http\Controllers\PortalTestController;
+
+// Sisi HR — kelola bank soal (di halaman Edit Master Training)
+Route::post('training-modules/{training_module}/questions', [TrainingModuleQuestionController::class, 'store'])
+    ->name('training-modules.questions.store');
+Route::put('training-modules/{training_module}/questions/{question}', [TrainingModuleQuestionController::class, 'update'])
+    ->name('training-modules.questions.update');
+Route::delete('training-modules/{training_module}/questions/{question}', [TrainingModuleQuestionController::class, 'destroy'])
+    ->name('training-modules.questions.destroy');
+
+// Sisi Karyawan — WAJIB login (taruh di dalam group Route::middleware('auth:employee') yang sudah ada)
+Route::middleware('auth:employee')->group(function () {
+    // ... route portal yang sudah ada (portal.index, portal.materials.download, portal.logout) ...
+
+    Route::get('/portal/modules/{training_module}', [PortalTestController::class, 'show'])
+        ->name('portal.modules.show');
+    Route::post('/portal/modules/{training_module}/pretest', [PortalTestController::class, 'submitPretest'])
+        ->name('portal.modules.pretest');
+    Route::post('/portal/modules/{training_module}/material-confirm', [PortalTestController::class, 'confirmMaterial'])
+        ->name('portal.modules.material-confirm');
+    Route::post('/portal/modules/{training_module}/posttest', [PortalTestController::class, 'submitPosttest'])
+        ->name('portal.modules.posttest');
+});
+```
+
+### c. Cara Kerja Alurnya
+1. **HR** buka **Master Training → Edit** modul yang bersangkutan → scroll ke
+   card **"Bank Soal Pre-Test / Post-Test"** → tambah soal pilihan ganda
+   (minimal 1 soal supaya alur test aktif untuk modul ini).
+2. **Kalau modul TIDAK punya soal sama sekali** → karyawan di Portal tetap
+   bisa langsung download materi seperti biasa (tanpa test) — jadi update ini
+   tidak memaksa semua modul lama harus dikasih soal.
+3. **Kalau modul PUNYA soal** → kartu modul di Portal menampilkan status
+   (Belum Mulai / Sedang Baca Materi / Perlu Post-Test / Selesai) dan tombol
+   "Lanjutkan" yang mengarahkan ke tahap yang sesuai — **karyawan tidak bisa
+   melompati tahap** (dicek server-side via `abort_unless($progress->stage === ...)`,
+   bukan cuma disembunyikan di tampilan).
+4. **Post-test yang tidak lulus** (skor < `passing_score`) otomatis
+   mengembalikan karyawan ke tahap post-test untuk mengulang — TIDAK ada
+   batasan jumlah percobaan di versi ini.
+5. **Post-test yang LULUS otomatis membuat `TrainingHistory`** — persis
+   seperti training reguler (ikut kehitung di Dashboard, Report, dan
+   pengingat mandatory training), dengan `trainer_name_snapshot` = "Self-Paced
+   (Portal Karyawan)" supaya jelas asalnya dari alur self-paced ini, bukan
+   Training Session tatap muka.
+
+### d. Keputusan Desain
+- **Soal pre-test dan post-test adalah SOAL YANG SAMA** (satu bank soal per
+  modul) — dipakai dua kali untuk mengukur peningkatan pemahaman, sesuai
+  keputusan Anda.
+- **`employee_module_progress` satu baris per (karyawan, modul)** — bukan
+  tabel riwayat semua percobaan. Kalau post-test diulang, field `posttest_*`
+  di baris yang sama ditimpa. Kalau nanti butuh riwayat semua percobaan
+  (bukan cuma yang terakhir), beri tahu saya untuk saya tambahkan tabel
+  attempts terpisah.
+- **Jawaban tersimpan** (`pretest_answers`/`posttest_answers`, format JSON)
+  untuk keperluan audit, meski belum ada halaman untuk melihatnya secara
+  detail — bisa saya tambahkan kalau perlu.
+
 ## 18. Update — Tampilan Direstyle (Sidebar Admin Panel Style) ✅
 
 Atas permintaan Anda, seluruh tampilan direstyle mengikuti gaya admin panel yang

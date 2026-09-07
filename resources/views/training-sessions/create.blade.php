@@ -54,11 +54,11 @@
                 </div>
 
                 <div class="col-md-2">
-                    <label class="form-label">Durasi Aktual (jam)</label>
-                    <input type="number" step="0.5" name="actual_duration_hours"
-                           class="form-control @error('actual_duration_hours') is-invalid @enderror"
-                           value="{{ old('actual_duration_hours') }}" placeholder="Opsional">
-                    @error('actual_duration_hours') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    <label class="form-label">Durasi Aktual (menit)</label>
+                    <input type="number" step="5" name="actual_duration_minutes"
+                           class="form-control @error('actual_duration_minutes') is-invalid @enderror"
+                           value="{{ old('actual_duration_minutes') }}" placeholder="mis. 120">
+                    @error('actual_duration_minutes') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
 
                 <div class="col-md-3">
@@ -89,7 +89,7 @@
 
             <div class="row g-2 mb-3">
                 <div class="col-md-4">
-                    <input type="text" id="search-employee" class="form-control" placeholder="Cari nama / NIK...">
+                    <input type="text" id="search-employee" class="form-control" placeholder="Cari nama / nomor karyawan...">
                 </div>
                 <div class="col-md-4">
                     <select id="filter-department" class="form-select">
@@ -110,7 +110,7 @@
                     <thead class="sticky-top bg-white">
                         <tr>
                             <th style="width: 40px;"></th>
-                            <th>NIK</th>
+                            <th>Nomor Karyawan</th>
                             <th>Nama</th>
                             <th>Departemen</th>
                             <th>Jabatan</th>
@@ -120,13 +120,13 @@
                         @php $oldSelected = old('employee_ids', []); @endphp
                         @foreach($employees as $emp)
                             <tr class="employee-row" data-department="{{ $emp->department_id }}"
-                                data-search="{{ strtolower($emp->name . ' ' . $emp->nik) }}">
+                                data-search="{{ strtolower($emp->name . ' ' . $emp->employee_number) }}">
                                 <td>
                                     <input type="checkbox" class="form-check-input employee-checkbox"
                                            name="employee_ids[]" value="{{ $emp->id }}"
                                            @checked(in_array($emp->id, $oldSelected))>
                                 </td>
-                                <td>{{ $emp->nik }}</td>
+                                <td>{{ $emp->employee_number }}</td>
                                 <td>{{ $emp->name }}</td>
                                 <td>{{ $emp->department->name }}</td>
                                 <td>{{ $emp->position ?? '-' }}</td>

@@ -19,20 +19,20 @@
     <table>
         <thead>
             <tr>
-                <th>NIK</th>
+                <th>Nomor Karyawan</th>
                 <th>Nama</th>
                 <th>Departemen</th>
                 <th>Training</th>
                 <th>Mandatory</th>
                 <th>Tanggal</th>
                 <th>Trainer</th>
-                <th>Expired</th>
+                <th>Jadwal Ulang</th>
             </tr>
         </thead>
         <tbody>
             @foreach($histories as $history)
                 <tr>
-                    <td>{{ $history->employee->nik }}</td>
+                    <td>{{ $history->employee->employee_number }}</td>
                     <td>{{ $history->employee->name }}</td>
                     <td>{{ $history->employee->department->name }}</td>
                     <td>{{ $history->training_name_snapshot }}</td>

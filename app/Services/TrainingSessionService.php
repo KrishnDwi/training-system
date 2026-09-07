@@ -88,7 +88,7 @@ class TrainingSessionService
             'is_mandatory_snapshot' => $module->is_mandatory,
             'trainer_name_snapshot' => $session->trainer_name,
             'training_date' => $session->session_date,
-            'duration_hours_snapshot' => $session->actual_duration_hours ?? $module->standard_duration_hours,
+            'duration_minutes_snapshot' => $session->actual_duration_minutes ?? $module->standard_duration_minutes,
             'validity_months_snapshot' => $module->validity_months,
             'expired_at' => $expiredAt,
         ]);

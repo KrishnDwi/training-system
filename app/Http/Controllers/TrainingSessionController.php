@@ -34,7 +34,7 @@ class TrainingSessionController extends Controller
         $employees = \App\Models\Employee::with('department')
             ->active()
             ->orderBy('name')
-            ->get(['id', 'name', 'nik', 'department_id', 'position']);
+            ->get(['id', 'name', 'employee_number', 'department_id', 'position']);
 
         return view('training-sessions.create', compact('modules', 'departments', 'employees'));
     }
