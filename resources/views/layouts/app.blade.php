@@ -218,6 +218,13 @@
                     <i class="bi bi-file-earmark-bar-graph"></i> Report
                 </a>
             @endif
+
+            @if(Route::has('certificate-template.edit'))
+                <div class="sidebar-section-label">Settings</div>
+                <a class="nav-link {{ request()->routeIs('certificate-template.*') ? 'active' : '' }}" href="{{ route('certificate-template.edit') }}">
+                    <i class="bi bi-patch-check"></i> Template Sertifikat
+                </a>
+            @endif
         </nav>
     </aside>
 

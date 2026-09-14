@@ -53,6 +53,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\EmployeeAuthController;
 use App\Http\Controllers\EmployeePortalController;
 use App\Http\Controllers\PortalTestController;
+use App\Http\Controllers\CertificateTemplateController;
 
 /*
 |--------------------------------------------------------------------------
@@ -154,7 +155,21 @@ Route::middleware('auth:employee')->group(function () {
         ->name('portal.modules.material-confirm');
     Route::post('/portal/modules/{training_module}/posttest', [PortalTestController::class, 'submitPosttest'])
         ->name('portal.modules.posttest');
+    Route::get('/portal/modules/{training_module}/certificate', [PortalTestController::class, 'downloadCertificate'])
+        ->name('portal.modules.certificate');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Template Sertifikat (sisi HR — singleton, 1 desain dipakai semua training)
+|--------------------------------------------------------------------------
+*/
+Route::get('certificate-template', [CertificateTemplateController::class, 'edit'])
+    ->name('certificate-template.edit');
+Route::post('certificate-template', [CertificateTemplateController::class, 'update'])
+    ->name('certificate-template.update');
+Route::get('certificate-template/preview', [CertificateTemplateController::class, 'preview'])
+    ->name('certificate-template.preview');
 ```
 
 > **Catatan:** guard `employee` (`guest:employee` / `auth:employee` di atas)
@@ -695,6 +710,118 @@ tidak perlu ditambah lagi terpisah di sini.
 - **Jawaban tersimpan** (`pretest_answers`/`posttest_answers`, format JSON)
   untuk keperluan audit, meski belum ada halaman untuk melihatnya secara
   detail — bisa saya tambahkan kalau perlu.
+
+### e. Update — Materi Tetap Bisa Didownload Setelah Post-Test Selesai ✅
+Sebelumnya, begitu karyawan sampai di tahap "Selesai" (lulus post-test),
+halaman itu cuma menampilkan skor — tidak ada lagi akses ke materi. Sekarang
+halaman **Selesai** juga menampilkan daftar materi + tombol download, supaya
+karyawan bisa buka lagi materinya kapan saja untuk referensi, bukan cuma
+sekali baca sebelum post-test.
+
+Tidak perlu migration untuk update ini — cukup timpa
+`resources/views/portal/test/completed.blade.php`.
+
+### f. Update — Waktu Pengerjaan Pre-Test & Post-Test Dicatat ✅
+
+**Jalankan migration baru:**
+```bash
+php artisan migrate
+```
+Menambahkan kolom `pretest_started_at` dan `posttest_started_at` di
+`employee_module_progress` (waktu selesai sudah ada sejak awal).
+
+**Cara kerjanya:**
+- Waktu MULAI dicatat otomatis saat karyawan **pertama kali membuka**
+  halaman soal (bukan saat submit) — supaya durasi yang tercatat benar-benar
+  mencerminkan waktu mengerjakan, bukan cuma waktu klik submit.
+- Post-test yang diulang (gagal lalu coba lagi) otomatis mendapat waktu mulai
+  yang baru untuk setiap percobaan.
+- Durasi ditampilkan dalam format "X menit Y detik" — dihitung dinamis dari
+  selisih waktu mulai & selesai (`$progress->pretest_duration` /
+  `$progress->posttest_duration`), **tidak disimpan sebagai angka statis**,
+  konsisten dengan prinsip yang sama seperti perhitungan status expired/umur.
+- Muncul di pesan sukses setelah submit test, dan di halaman **Selesai**
+  (ringkasan skor + durasi pre-test & post-test).
+
+**Belum ditampilkan di sisi HR** (Dashboard/Report/Detail Karyawan) — data
+ini baru terlihat oleh karyawan sendiri di Portal. Beri tahu saya kalau HR
+juga perlu melihat durasi pengerjaan tiap karyawan (misalnya untuk mendeteksi
+kalau ada yang mengerjakan post-test terlalu cepat/mencurigakan).
+
+## 30. Fitur Baru — Sertifikat Otomatis Setelah Lulus Post-Test ✅
+
+### a. Migration baru
+```bash
+php artisan migrate
+```
+Menambahkan tabel `certificate_templates` (singleton — cuma 1 baris, 1 desain
+dipakai untuk semua training).
+
+### b. Route
+Sudah termasuk di blok lengkap **bagian 3** di atas (`certificate-template.*`
+dan `portal.modules.certificate`).
+
+### c. Cara Kerja
+1. **HR** buka menu **Settings → Template Sertifikat** di sidebar → upload
+   gambar background desain sertifikat (JPG/PNG, disarankan ukuran A4
+   landscape 297×210mm) → atur posisi (X, Y dalam mm dari pojok kiri-atas),
+   ukuran font, warna, dan perataan untuk 4 elemen teks: **Nama Karyawan**,
+   **Nama Training**, **Tanggal Lulus**, **Skor Post-Test** (skor bisa
+   dimatikan/disembunyikan kalau tidak mau ditampilkan di sertifikat).
+2. Pakai tombol **Preview PDF** untuk melihat hasilnya dengan data contoh —
+   ulangi atur posisi sampai pas, tidak apa-apa coba-coba berkali-kali,
+   preview tidak memengaruhi data apa pun.
+3. **Karyawan** yang lulus post-test akan melihat tombol **"Download
+   Sertifikat"** di halaman "Selesai" pada Portal Karyawan.
+4. Sertifikat **dibuat on-the-fly saat didownload** (bukan disimpan sebagai
+   file) — nama, nama training, tanggal, dan skor otomatis terisi sesuai
+   data karyawan yang bersangkutan. Kalau HR mengubah desain template
+   nanti, sertifikat yang didownload berikutnya otomatis pakai desain baru.
+
+### d. Keputusan Desain
+- **Satu template untuk semua training** (bukan per-modul) — supaya HR tidak
+  perlu upload desain berulang kali kalau memang mau pakai 1 desain sertifikat
+  seragam. Kalau ternyata Anda butuh desain berbeda per training/kategori,
+  beri tahu saya untuk saya ubah jadi per-modul.
+- **Generate on-the-fly, tidak disimpan** — lebih aman (tidak ada file
+  sertifikat "basi" kalau template berubah) dan lebih hemat storage.
+- **Posisi diatur manual via angka (mm)**, bukan drag-and-drop visual —
+  MVP paling sederhana untuk diimplementasikan. Kalau nanti terasa ribet,
+  saya bisa buatkan pemilih posisi visual (klik di gambar untuk taruh
+  teks) sebagai peningkatan berikutnya.
+
+### e. ⚠️ Kalau gambar background tidak muncul di PDF
+DomPDF kadang perlu opsi tambahan untuk membaca file gambar lokal. Kalau
+preview PDF menampilkan halaman kosong/putih, cek `config/dompdf.php`, cari
+opsi `'isRemoteEnabled'` dan pastikan nilainya `true`.
+
+## 31. Update — Restrukturisasi URL: "/" ke Login Karyawan, HRD di "/admin" ✅
+
+Sesuai permintaan Anda:
+- **`/`** (root) sekarang langsung mengarahkan ke halaman **login Portal
+  Karyawan** (`/portal/login`).
+- **`/admin`** sekarang jadi Dashboard HRD (sebelumnya di `/dashboard` atau `/`).
+- Semua halaman HRD lain otomatis ikut pindah ke bawah `/admin` juga —
+  `/admin/training-modules`, `/admin/employees`, `/admin/training-sessions`,
+  `/admin/reports`, `/admin/certificate-template`, dst.
+
+**File yang berubah:**
+- `routes/web.php` — **ditulis ulang total** (bukan ditambah manual seperti
+  update sebelumnya) — semua route HRD sekarang dibungkus
+  `Route::prefix('admin')->group(...)`. **Karena nama route (`dashboard`,
+  `employees.index`, dst) TIDAK berubah**, seluruh pemanggilan `route(...)`
+  di view dan controller otomatis tetap benar tanpa perlu disentuh.
+- `resources/views/employees/index.blade.php` dan
+  `resources/views/training-modules/index.blade.php` — ada beberapa link
+  yang di-generate lewat JavaScript (bukan pakai `route()` Blade, karena
+  perlu ID dinamis dari DataTables) yang sebelumnya hardcode `/employees/...`
+  dan `/training-modules/...` — sekarang ditambah prefix `/admin/` juga.
+
+**Tidak perlu migration** untuk update ini — murni perubahan routing.
+
+⚠️ **Kalau Anda pernah bookmark/share link lama** (`/dashboard`,
+`/employees`, dll — tanpa `/admin`), link itu akan **404** setelah update
+ini. Perlu update semua bookmark ke URL baru yang berawalan `/admin`.
 
 ## 18. Update — Tampilan Direstyle (Sidebar Admin Panel Style) ✅
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CertificateTemplate;
 use App\Models\EmployeeModuleProgress;
 use App\Models\TrainingHistory;
 use App\Models\TrainingModule;
@@ -27,10 +28,39 @@ class PortalTestController extends Controller
             'training_module_id' => $trainingModule->id,
         ]);
 
+        // Catat waktu MULAI saat halaman soal dibuka (bukan saat submit) —
+        // supaya durasi pengerjaan yang tercatat akurat mencerminkan waktu
+        // karyawan benar-benar mengerjakan, bukan cuma waktu klik submit.
+        if ($progress->stage === 'pretest' && !$progress->pretest_started_at) {
+            $progress->update(['pretest_started_at' => now()]);
+        }
+
+        // Untuk post-test: reset waktu mulai setiap kali masuk ulang ke tahap
+        // ini SELAMA belum lulus — mencakup percobaan pertama maupun retry
+        // setelah gagal, supaya durasi yang tercatat selalu punya acuan yang benar.
+        if ($progress->stage === 'posttest' && (!$progress->posttest_started_at || $progress->posttest_completed_at)) {
+            $progress->update(['posttest_started_at' => now()]);
+        }
+
+        $progress = $progress->fresh();
+
+        // Deadline dikirim ke view sebagai epoch milidetik (dipakai JS
+        // countdown) — null kalau modul ini tidak diberi batas waktu.
+        $deadlineAt = match ($progress->stage) {
+            'pretest' => $trainingModule->pretest_time_limit_minutes
+                ? $progress->pretest_started_at->copy()->addMinutes($trainingModule->pretest_time_limit_minutes)
+                : null,
+            'posttest' => $trainingModule->posttest_time_limit_minutes
+                ? $progress->posttest_started_at->copy()->addMinutes($trainingModule->posttest_time_limit_minutes)
+                : null,
+            default => null,
+        };
+        $deadlineAtMs = $deadlineAt?->getTimestamp() * 1000;
+
         return match ($progress->stage) {
-            'pretest' => view('portal.test.pretest', compact('trainingModule', 'progress')),
+            'pretest' => view('portal.test.pretest', compact('trainingModule', 'progress', 'deadlineAtMs')),
             'material' => view('portal.test.material', compact('trainingModule', 'progress')),
-            'posttest' => view('portal.test.posttest', compact('trainingModule', 'progress')),
+            'posttest' => view('portal.test.posttest', compact('trainingModule', 'progress', 'deadlineAtMs')),
             'completed' => view('portal.test.completed', compact('trainingModule', 'progress')),
         };
     }
@@ -52,9 +82,11 @@ class PortalTestController extends Controller
             'pretest_completed_at' => now(),
         ]);
 
+        $duration = $progress->fresh()->pretest_duration;
+
         return redirect()
             ->route('portal.modules.show', $trainingModule)
-            ->with('success', "Pre-test selesai. Skor Anda: {$score}. Silakan lanjut membaca materi.");
+            ->with('success', "Pre-test selesai dalam {$duration}. Skor Anda: {$score}. Silakan lanjut membaca materi.");
     }
 
     public function confirmMaterial(TrainingModule $trainingModule)
@@ -92,17 +124,52 @@ class PortalTestController extends Controller
             'posttest_completed_at' => now(),
         ]);
 
+        $duration = $progress->fresh()->posttest_duration;
+
         if ($passed) {
             $this->recordTrainingHistory($employee, $trainingModule);
 
             return redirect()
                 ->route('portal.modules.show', $trainingModule)
-                ->with('success', "Selamat! Post-test lulus dengan skor {$score}. Training ini sudah tercatat otomatis.");
+                ->with('success', "Selamat! Post-test lulus dalam {$duration} dengan skor {$score}. Training ini sudah tercatat otomatis.");
         }
 
         return redirect()
             ->route('portal.modules.show', $trainingModule)
-            ->with('warning', "Skor Anda {$score}, belum mencapai nilai minimum {$trainingModule->passing_score}. Silakan coba post-test lagi.");
+            ->with('warning', "Post-test selesai dalam {$duration} dengan skor {$score}, belum mencapai nilai minimum {$trainingModule->passing_score}. Silakan coba post-test lagi.");
+    }
+
+    /**
+     * Download sertifikat kelulusan — hanya untuk training yang sudah
+     * benar-benar SELESAI (lulus post-test). Diberikan HANYA kalau HR sudah
+     * upload Template Sertifikat; kalau belum, karyawan diberi pesan yang
+     * jelas (bukan error mentah).
+     */
+    public function downloadCertificate(TrainingModule $trainingModule)
+    {
+        $employee = Auth::guard('employee')->user();
+        $progress = EmployeeModuleProgress::where('employee_id', $employee->id)
+            ->where('training_module_id', $trainingModule->id)
+            ->firstOrFail();
+
+        abort_unless($progress->stage === 'completed', 403, 'Anda belum menyelesaikan training ini.');
+
+        $template = CertificateTemplate::current();
+
+        if (!$template) {
+            return back()->with('warning', 'Template sertifikat belum tersedia. Hubungi HRD.');
+        }
+
+        $pdf = $template->renderPdf([
+            'name' => $employee->name,
+            'module' => $trainingModule->name,
+            'date' => $progress->posttest_completed_at->translatedFormat('d F Y'),
+            'score' => (string) $progress->posttest_score,
+        ]);
+
+        $fileName = 'Sertifikat - ' . $trainingModule->name . ' - ' . $employee->name . '.pdf';
+
+        return $pdf->download($fileName);
     }
 
     /**

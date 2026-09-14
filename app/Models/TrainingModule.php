@@ -18,6 +18,8 @@ class TrainingModule extends Model
         'standard_duration_minutes',
         'validity_months',
         'passing_score',
+        'pretest_time_limit_minutes',
+        'posttest_time_limit_minutes',
         'description',
         'is_active',
     ];

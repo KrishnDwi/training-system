@@ -59,8 +59,8 @@ $(function () {
                 data: 'id',
                 orderable: false,
                 render: (id) => `
-                    <a href="/training-modules/${id}/edit" class="btn btn-sm btn-outline-primary">Edit</a>
-                    <form action="/training-modules/${id}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus/nonaktifkan modul ini?')">
+                    <a href="/admin/training-modules/${id}/edit" class="btn btn-sm btn-outline-primary">Edit</a>
+                    <form action="/admin/training-modules/${id}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus/nonaktifkan modul ini?')">
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="_method" value="DELETE">
                         <button type="submit" class="btn btn-sm btn-outline-danger">Hapus</button>

@@ -15,19 +15,23 @@ class EmployeeModuleProgress extends Model
         'training_module_id',
         'pretest_score',
         'pretest_answers',
+        'pretest_started_at',
         'pretest_completed_at',
         'material_confirmed_at',
         'posttest_score',
         'posttest_answers',
         'posttest_passed',
+        'posttest_started_at',
         'posttest_completed_at',
     ];
 
     protected $casts = [
         'pretest_answers' => 'array',
         'posttest_answers' => 'array',
+        'pretest_started_at' => 'datetime',
         'pretest_completed_at' => 'datetime',
         'material_confirmed_at' => 'datetime',
+        'posttest_started_at' => 'datetime',
         'posttest_completed_at' => 'datetime',
         'posttest_passed' => 'boolean',
     ];
@@ -62,5 +66,37 @@ class EmployeeModuleProgress extends Model
         }
 
         return 'completed';
+    }
+
+    /**
+     * Durasi pengerjaan dalam format singkat (mis. "3 menit 12 detik").
+     * Dihitung dinamis dari selisih started_at & completed_at — tidak
+     * disimpan sebagai angka statis, supaya tidak perlu kolom tambahan.
+     */
+    public function getPretestDurationAttribute(): ?string
+    {
+        return $this->formatDuration($this->pretest_started_at, $this->pretest_completed_at);
+    }
+
+    public function getPosttestDurationAttribute(): ?string
+    {
+        return $this->formatDuration($this->posttest_started_at, $this->posttest_completed_at);
+    }
+
+    protected function formatDuration($start, $end): ?string
+    {
+        if (!$start || !$end) {
+            return null;
+        }
+
+        $seconds = $start->diffInSeconds($end);
+        $minutes = intdiv($seconds, 60);
+        $remainingSeconds = $seconds % 60;
+
+        if ($minutes === 0) {
+            return "{$remainingSeconds} detik";
+        }
+
+        return "{$minutes} menit {$remainingSeconds} detik";
     }
 }

@@ -23,7 +23,14 @@
             </p>
         @endif
 
-        <form action="{{ route('portal.modules.posttest', $trainingModule) }}" method="POST">
+        @if($deadlineAtMs)
+            <div class="alert alert-warning d-flex justify-content-between align-items-center" id="timer-box">
+                <span id="timer-label">Sisa waktu mengerjakan:</span>
+                <strong id="countdown-display" class="fs-5">--:--</strong>
+            </div>
+        @endif
+
+        <form action="{{ route('portal.modules.posttest', $trainingModule) }}" method="POST" data-test-form>
             @csrf
             @foreach($trainingModule->questions as $question)
                 <div class="mb-4 pb-3 border-bottom">
@@ -45,4 +52,8 @@
         </form>
     </div>
 </div>
+
+@if($deadlineAtMs)
+    @include('portal.test._countdown-script', ['deadlineAtMs' => $deadlineAtMs])
+@endif
 @endsection

@@ -61,6 +61,25 @@
     </div>
 
     <div class="col-md-3">
+        <label class="form-label">Batas Waktu Pre-Test (menit)</label>
+        <input type="number" name="pretest_time_limit_minutes" min="1" max="600"
+               class="form-control @error('pretest_time_limit_minutes') is-invalid @enderror"
+               value="{{ old('pretest_time_limit_minutes', $trainingModule->pretest_time_limit_minutes ?? '') }}"
+               placeholder="Kosongkan = tanpa batas waktu">
+        @error('pretest_time_limit_minutes') <div class="invalid-feedback">{{ $message }}</div> @enderror
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label">Batas Waktu Post-Test (menit)</label>
+        <input type="number" name="posttest_time_limit_minutes" min="1" max="600"
+               class="form-control @error('posttest_time_limit_minutes') is-invalid @enderror"
+               value="{{ old('posttest_time_limit_minutes', $trainingModule->posttest_time_limit_minutes ?? '') }}"
+               placeholder="Kosongkan = tanpa batas waktu">
+        <small class="text-muted">Saat waktu habis, jawaban yang sudah diisi otomatis ter-submit</small>
+        @error('posttest_time_limit_minutes') <div class="invalid-feedback">{{ $message }}</div> @enderror
+    </div>
+
+    <div class="col-md-3">
         <label class="form-label">Status</label>
         <select name="is_active" class="form-select @error('is_active') is-invalid @enderror" required>
             @php $isActive = old('is_active', $trainingModule->is_active ?? true); @endphp

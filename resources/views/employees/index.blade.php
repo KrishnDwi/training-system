@@ -127,9 +127,9 @@ $(function () {
                 data: 'id',
                 orderable: false,
                 render: (id) => `
-                    <a href="/employees/${id}" class="btn btn-sm btn-outline-secondary">Detail</a>
-                    <a href="/employees/${id}/edit" class="btn btn-sm btn-outline-primary">Edit</a>
-                    <form action="/employees/${id}" method="POST" class="d-inline" onsubmit="return confirm('Nonaktifkan karyawan ini?')">
+                    <a href="/admin/employees/${id}" class="btn btn-sm btn-outline-secondary">Detail</a>
+                    <a href="/admin/employees/${id}/edit" class="btn btn-sm btn-outline-primary">Edit</a>
+                    <form action="/admin/employees/${id}" method="POST" class="d-inline" onsubmit="return confirm('Nonaktifkan karyawan ini?')">
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="_method" value="DELETE">
                         <button type="submit" class="btn btn-sm btn-outline-danger">Nonaktifkan</button>
