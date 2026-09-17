@@ -32,13 +32,24 @@
             @foreach($trainingModule->questions as $question)
                 <div class="mb-4 pb-3 border-bottom">
                     <p class="fw-semibold">{{ $loop->iteration }}. {{ $question->question_text }}</p>
-                    @foreach($question->optionsList() as $key => $text)
-                        <div class="form-check">
+
+                    @if($question->question_image_path)
+                        <img src="{{ route('questions.image', [$question, 'question']) }}"
+                             class="img-fluid rounded mb-3" style="max-height: 300px;">
+                    @endif
+
+                    @foreach($question->optionsList() as $key => $data)
+                        <div class="form-check mb-2">
                             <input class="form-check-input" type="radio"
                                    name="answers[{{ $question->id }}]" value="{{ $key }}"
                                    id="q{{ $question->id }}_{{ $key }}" required>
                             <label class="form-check-label" for="q{{ $question->id }}_{{ $key }}">
-                                {{ strtoupper($key) }}. {{ $text }}
+                                {{ strtoupper($key) }}. {{ $data['text'] }}
+                                @if($data['image'])
+                                    <br>
+                                    <img src="{{ route('questions.image', [$question, 'option_'.$key]) }}"
+                                         class="img-fluid rounded mt-1" style="max-height: 160px;">
+                                @endif
                             </label>
                         </div>
                     @endforeach

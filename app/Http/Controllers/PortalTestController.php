@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CertificateTemplate;
 use App\Models\EmployeeModuleProgress;
+use App\Models\EmployeePosttestAttempt;
 use App\Models\TrainingHistory;
 use App\Models\TrainingModule;
 use Illuminate\Http\Request;
@@ -57,11 +58,18 @@ class PortalTestController extends Controller
         };
         $deadlineAtMs = $deadlineAt?->getTimestamp() * 1000;
 
+        // Riwayat semua percobaan post-test — ditampilkan ke karyawan supaya
+        // mereka bisa melihat progres skor tiap percobaan.
+        $posttestAttempts = EmployeePosttestAttempt::where('employee_id', $employee->id)
+            ->where('training_module_id', $trainingModule->id)
+            ->orderBy('attempt_number')
+            ->get();
+
         return match ($progress->stage) {
             'pretest' => view('portal.test.pretest', compact('trainingModule', 'progress', 'deadlineAtMs')),
             'material' => view('portal.test.material', compact('trainingModule', 'progress')),
-            'posttest' => view('portal.test.posttest', compact('trainingModule', 'progress', 'deadlineAtMs')),
-            'completed' => view('portal.test.completed', compact('trainingModule', 'progress')),
+            'posttest' => view('portal.test.posttest', compact('trainingModule', 'progress', 'deadlineAtMs', 'posttestAttempts')),
+            'completed' => view('portal.test.completed', compact('trainingModule', 'progress', 'posttestAttempts')),
         };
     }
 
@@ -116,12 +124,33 @@ class PortalTestController extends Controller
 
         [$score, $answers] = $this->scoreAnswers($trainingModule, $request->input('answers', []));
         $passed = $score >= $trainingModule->passing_score;
+        $completedAt = now();
 
+        // 1. Simpan percobaan ini sebagai record BARU yang permanen —
+        //    percobaan sebelumnya TIDAK ditimpa maupun dihapus.
+        $attemptNumber = EmployeePosttestAttempt::where('employee_id', $employee->id)
+            ->where('training_module_id', $trainingModule->id)
+            ->max('attempt_number') + 1;
+
+        EmployeePosttestAttempt::create([
+            'employee_id' => $employee->id,
+            'training_module_id' => $trainingModule->id,
+            'attempt_number' => $attemptNumber,
+            'score' => $score,
+            'passed' => $passed,
+            'answers' => $answers,
+            'started_at' => $progress->posttest_started_at,
+            'completed_at' => $completedAt,
+        ]);
+
+        // 2. Update status TERKINI di tabel progress (dipakai untuk logic
+        //    tahap alur/gating) — ini memang sengaja ditimpa tiap percobaan,
+        //    karena riwayat lengkapnya sudah aman tersimpan di langkah 1.
         $progress->update([
             'posttest_score' => $score,
             'posttest_answers' => $answers,
             'posttest_passed' => $passed,
-            'posttest_completed_at' => now(),
+            'posttest_completed_at' => $completedAt,
         ]);
 
         $duration = $progress->fresh()->posttest_duration;
@@ -131,12 +160,12 @@ class PortalTestController extends Controller
 
             return redirect()
                 ->route('portal.modules.show', $trainingModule)
-                ->with('success', "Selamat! Post-test lulus dalam {$duration} dengan skor {$score}. Training ini sudah tercatat otomatis.");
+                ->with('success', "Selamat! Post-test lulus pada percobaan ke-{$attemptNumber} dalam {$duration} dengan skor {$score}. Training ini sudah tercatat otomatis.");
         }
 
         return redirect()
             ->route('portal.modules.show', $trainingModule)
-            ->with('warning', "Post-test selesai dalam {$duration} dengan skor {$score}, belum mencapai nilai minimum {$trainingModule->passing_score}. Silakan coba post-test lagi.");
+            ->with('warning', "Percobaan ke-{$attemptNumber} selesai dalam {$duration} dengan skor {$score}, belum mencapai nilai minimum {$trainingModule->passing_score}. Silakan coba post-test lagi.");
     }
 
     /**

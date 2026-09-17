@@ -91,17 +91,28 @@
         @forelse($trainingModule->questions as $question)
             <div class="border rounded p-3 mb-2">
                 <div class="d-flex justify-content-between align-items-start">
-                    <strong>{{ $loop->iteration }}. {{ $question->question_text }}</strong>
-                    <form action="{{ route('training-modules.questions.destroy', [$trainingModule, $question]) }}" method="POST" onsubmit="return confirm('Hapus soal ini?')">
+                    <strong>{{ $loop->iteration }}. {{ $question->question_text ?: '(gambar saja)' }}</strong>
+                    <form action="{{ route('training-modules.questions.destroy', [$trainingModule, $question]) }}" method="POST" onsubmit="return confirm('Hapus soal ini? Gambar yang terlampir juga akan dihapus.')">
                         @csrf @method('DELETE')
                         <button class="btn btn-sm btn-outline-danger">Hapus</button>
                     </form>
                 </div>
+
+                @if($question->question_image_path)
+                    <img src="{{ route('questions.image', [$question, 'question']) }}"
+                         class="img-fluid rounded mt-2" style="max-height: 180px;">
+                @endif
+
                 <ul class="list-unstyled mt-2 mb-0 small">
-                    @foreach(['a','b','c','d'] as $opt)
-                        <li class="{{ $question->correct_option === $opt ? 'text-success fw-semibold' : '' }}">
-                            {{ strtoupper($opt) }}. {{ $question->{'option_'.$opt} }}
+                    @foreach($question->optionsList() as $opt => $data)
+                        <li class="mb-1 {{ $question->correct_option === $opt ? 'text-success fw-semibold' : '' }}">
+                            {{ strtoupper($opt) }}. {{ $data['text'] }}
                             @if($question->correct_option === $opt) <i class="bi bi-check-circle-fill"></i> @endif
+                            @if($data['image'])
+                                <br>
+                                <img src="{{ route('questions.image', [$question, 'option_'.$opt]) }}"
+                                     class="img-fluid rounded mt-1" style="max-height: 100px;">
+                            @endif
                         </li>
                     @endforeach
                 </ul>
@@ -112,29 +123,43 @@
 
         <hr>
         <h6 class="small text-primary">Tambah Soal Baru</h6>
-        <form action="{{ route('training-modules.questions.store', $trainingModule) }}" method="POST">
+        <p class="text-muted small">
+            Pertanyaan dan tiap opsi bisa diisi <strong>teks saja, gambar saja, atau keduanya</strong> —
+            minimal salah satu harus diisi. Format gambar: JPG/PNG, maksimal 5MB per gambar.
+        </p>
+
+        <form action="{{ route('training-modules.questions.store', $trainingModule) }}" method="POST" enctype="multipart/form-data">
             @csrf
-            <div class="mb-2">
+            <div class="mb-3">
                 <label class="form-label small">Pertanyaan</label>
-                <textarea name="question_text" rows="2" class="form-control form-control-sm" required></textarea>
+                <textarea name="question_text" rows="2" class="form-control form-control-sm @error('question_text') is-invalid @enderror">{{ old('question_text') }}</textarea>
+                @error('question_text') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                <input type="file" name="question_image" accept="image/*" class="form-control form-control-sm mt-1">
+                <small class="text-muted">Gambar pertanyaan (opsional)</small>
             </div>
-            <div class="row g-2">
+
+            <div class="row g-3">
                 @foreach(['a','b','c','d'] as $opt)
                     <div class="col-md-6">
                         <label class="form-label small">Opsi {{ strtoupper($opt) }}</label>
-                        <input type="text" name="option_{{ $opt }}" class="form-control form-control-sm" required>
+                        <input type="text" name="option_{{ $opt }}" value="{{ old('option_'.$opt) }}"
+                               class="form-control form-control-sm @error('option_'.$opt) is-invalid @enderror">
+                        @error('option_'.$opt) <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        <input type="file" name="option_{{ $opt }}_image" accept="image/*" class="form-control form-control-sm mt-1">
+                        <small class="text-muted">Gambar opsi {{ strtoupper($opt) }} (opsional)</small>
                     </div>
                 @endforeach
             </div>
-            <div class="mt-2" style="max-width: 220px;">
+
+            <div class="mt-3" style="max-width: 220px;">
                 <label class="form-label small">Jawaban Benar</label>
                 <select name="correct_option" class="form-select form-select-sm" required>
-                    <option value="a">A</option>
-                    <option value="b">B</option>
-                    <option value="c">C</option>
-                    <option value="d">D</option>
+                    @foreach(['a','b','c','d'] as $opt)
+                        <option value="{{ $opt }}" @selected(old('correct_option') === $opt)>{{ strtoupper($opt) }}</option>
+                    @endforeach
                 </select>
             </div>
+
             <button type="submit" class="btn btn-sm btn-primary mt-3">Tambah Soal</button>
         </form>
     </div>

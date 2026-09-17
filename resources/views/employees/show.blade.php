@@ -225,4 +225,49 @@
         </table>
     </div>
 </div>
+
+{{-- ===== Riwayat Percobaan Post-Test (Portal Karyawan) ===== --}}
+@if($posttestAttempts->isNotEmpty())
+<div class="content-card mt-3">
+    <div class="content-card-header">Riwayat Percobaan Post-Test</div>
+    <div class="content-card-body p-0">
+        <table class="table mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th class="ps-4">Modul Training</th>
+                    <th>Percobaan</th>
+                    <th>Skor</th>
+                    <th>Hasil</th>
+                    <th>Durasi</th>
+                    <th class="pe-4">Waktu</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($posttestAttempts as $moduleId => $attempts)
+                    @foreach($attempts as $attempt)
+                        <tr>
+                            <td class="ps-4">
+                                @if($loop->first)
+                                    {{ $attempt->trainingModule->name ?? '-' }}
+                                @endif
+                            </td>
+                            <td>Ke-{{ $attempt->attempt_number }}</td>
+                            <td class="fw-semibold">{{ $attempt->score }}</td>
+                            <td>
+                                @if($attempt->passed)
+                                    <span class="badge bg-success">Lulus</span>
+                                @else
+                                    <span class="badge bg-secondary">Belum Lulus</span>
+                                @endif
+                            </td>
+                            <td>{{ $attempt->duration ?? '-' }}</td>
+                            <td class="pe-4">{{ $attempt->completed_at->format('d M Y H:i') }}</td>
+                        </tr>
+                    @endforeach
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endif
 @endsection

@@ -58,6 +58,16 @@ Route::middleware('auth:employee')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
+| Gambar Soal — diakses HR (halaman Edit) MAUPUN karyawan (halaman test)
+|--------------------------------------------------------------------------
+| Sengaja di LUAR prefix /admin karena dipakai dua-duanya. File disimpan di
+| disk privat, jadi akses harus lewat route ini (tidak ada URL langsung).
+*/
+Route::get('questions/{question}/image/{field}', [TrainingModuleQuestionController::class, 'showImage'])
+    ->name('questions.image');
+
+/*
+|--------------------------------------------------------------------------
 | ADMIN (HRD) — semuanya di bawah prefix /admin
 |--------------------------------------------------------------------------
 | Nama route (dashboard, training-modules.index, dst) TIDAK berubah —

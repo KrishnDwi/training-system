@@ -42,6 +42,8 @@ Training, Bank Soal Pre-Test/Post-Test). Tinggal copy semua sekaligus, tidak
 perlu cari-cari potongan lain di bagian bawah dokumen ini.
 
 ```php
+use Illuminate\Support\Facades\Route;
+
 use App\Http\Controllers\TrainingSessionController;
 use App\Http\Controllers\TrainingModuleController;
 use App\Http\Controllers\TrainingMaterialController;
@@ -57,83 +59,20 @@ use App\Http\Controllers\CertificateTemplateController;
 
 /*
 |--------------------------------------------------------------------------
-| Dashboard (root)
+| Root ("/") — langsung ke halaman login karyawan
 |--------------------------------------------------------------------------
+| Kalau karyawan sudah login, EmployeeAuthController::showLoginForm()
+| otomatis redirect ke portal.index — jadi ini aman dipanggil berulang.
 */
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-Route::get('/', [DashboardController::class, 'index']); // arahkan root ke dashboard
-
-/*
-|--------------------------------------------------------------------------
-| Master Training + Materi + Bank Soal
-|--------------------------------------------------------------------------
-*/
-// PENTING: route 'data' harus didaftarkan SEBELUM Route::resource,
-// supaya 'data' tidak tertangkap sebagai {training_module} (route model binding).
-Route::get('training-modules/data', [TrainingModuleController::class, 'data'])
-    ->name('training-modules.data');
-
-Route::resource('training-modules', TrainingModuleController::class)
-    ->except(['show']); // tidak perlu halaman detail terpisah untuk master data sederhana ini
-
-Route::post('training-modules/{training_module}/materials', [TrainingMaterialController::class, 'store'])
-    ->name('training-modules.materials.store');
-Route::delete('training-modules/{training_module}/materials/{material}', [TrainingMaterialController::class, 'destroy'])
-    ->name('training-modules.materials.destroy');
-
-Route::post('training-modules/{training_module}/questions', [TrainingModuleQuestionController::class, 'store'])
-    ->name('training-modules.questions.store');
-Route::put('training-modules/{training_module}/questions/{question}', [TrainingModuleQuestionController::class, 'update'])
-    ->name('training-modules.questions.update');
-Route::delete('training-modules/{training_module}/questions/{question}', [TrainingModuleQuestionController::class, 'destroy'])
-    ->name('training-modules.questions.destroy');
-
-/*
-|--------------------------------------------------------------------------
-| Training Session
-|--------------------------------------------------------------------------
-*/
-Route::resource('training-sessions', TrainingSessionController::class)
-    ->only(['index', 'create', 'store', 'show']);
-
-/*
-|--------------------------------------------------------------------------
-| Data Karyawan + Kontrak
-|--------------------------------------------------------------------------
-*/
-Route::get('employees/data', [EmployeeController::class, 'data'])
-    ->name('employees.data'); // didaftarkan sebelum resource, sama seperti training-modules/data
-
-Route::get('employees/import', [EmployeeController::class, 'showImportForm'])
-    ->name('employees.import.form');
-Route::post('employees/import', [EmployeeController::class, 'import'])
-    ->name('employees.import');
-
-Route::get('employees/export/master', [EmployeeController::class, 'exportMaster'])
-    ->name('employees.export.master');
-
-// 'show' TIDAK di-except — dipakai untuk halaman Detail Karyawan
-// (riwayat training + mandatory yang belum/perlu dilakukan).
-Route::resource('employees', EmployeeController::class);
-
-Route::post('employees/{employee}/contracts', [EmployeeContractController::class, 'store'])
-    ->name('employees.contracts.store');
-Route::delete('employees/{employee}/contracts/{contract}', [EmployeeContractController::class, 'destroy'])
-    ->name('employees.contracts.destroy');
-
-/*
-|--------------------------------------------------------------------------
-| Report
-|--------------------------------------------------------------------------
-*/
-Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-Route::get('/reports/export/excel', [ReportController::class, 'exportExcel'])->name('reports.export.excel');
-Route::get('/reports/export/pdf', [ReportController::class, 'exportPdf'])->name('reports.export.pdf');
+Route::get('/', function () {
+    return redirect()->route('portal.login');
+});
 
 /*
 |--------------------------------------------------------------------------
 | Portal Karyawan — Login (guest) & Halaman Utama (wajib login)
 |--------------------------------------------------------------------------
+| SENGAJA di luar prefix /admin — ini yang diakses karyawan biasa.
 */
 Route::middleware('guest:employee')->group(function () {
     Route::get('/portal/login', [EmployeeAuthController::class, 'showLoginForm'])->name('portal.login');
@@ -161,15 +100,85 @@ Route::middleware('auth:employee')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Template Sertifikat (sisi HR — singleton, 1 desain dipakai semua training)
+| Gambar Soal — diakses HR (halaman Edit) MAUPUN karyawan (halaman test)
 |--------------------------------------------------------------------------
+| Sengaja di LUAR prefix /admin karena dipakai dua-duanya. File disimpan di
+| disk privat, jadi akses harus lewat route ini (tidak ada URL langsung).
 */
-Route::get('certificate-template', [CertificateTemplateController::class, 'edit'])
-    ->name('certificate-template.edit');
-Route::post('certificate-template', [CertificateTemplateController::class, 'update'])
-    ->name('certificate-template.update');
-Route::get('certificate-template/preview', [CertificateTemplateController::class, 'preview'])
-    ->name('certificate-template.preview');
+Route::get('questions/{question}/image/{field}', [TrainingModuleQuestionController::class, 'showImage'])
+    ->name('questions.image');
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN (HRD) — semuanya di bawah prefix /admin
+|--------------------------------------------------------------------------
+| Nama route (dashboard, training-modules.index, dst) TIDAK berubah —
+| cuma URI-nya yang sekarang berawalan /admin. Semua pemanggilan route()
+| di view/controller otomatis tetap benar tanpa perlu diubah.
+*/
+Route::prefix('admin')->group(function () {
+
+    // Dashboard — otomatis jadi URI persis "/admin"
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Master Training + Materi + Bank Soal
+    // PENTING: route 'data' harus didaftarkan SEBELUM Route::resource,
+    // supaya 'data' tidak tertangkap sebagai {training_module} (route model binding).
+    Route::get('training-modules/data', [TrainingModuleController::class, 'data'])
+        ->name('training-modules.data');
+
+    Route::resource('training-modules', TrainingModuleController::class)
+        ->except(['show']); // tidak perlu halaman detail terpisah untuk master data sederhana ini
+
+    Route::post('training-modules/{training_module}/materials', [TrainingMaterialController::class, 'store'])
+        ->name('training-modules.materials.store');
+    Route::delete('training-modules/{training_module}/materials/{material}', [TrainingMaterialController::class, 'destroy'])
+        ->name('training-modules.materials.destroy');
+
+    Route::post('training-modules/{training_module}/questions', [TrainingModuleQuestionController::class, 'store'])
+        ->name('training-modules.questions.store');
+    Route::put('training-modules/{training_module}/questions/{question}', [TrainingModuleQuestionController::class, 'update'])
+        ->name('training-modules.questions.update');
+    Route::delete('training-modules/{training_module}/questions/{question}', [TrainingModuleQuestionController::class, 'destroy'])
+        ->name('training-modules.questions.destroy');
+
+    // Training Session
+    Route::resource('training-sessions', TrainingSessionController::class)
+        ->only(['index', 'create', 'store', 'show']);
+
+    // Data Karyawan + Kontrak
+    Route::get('employees/data', [EmployeeController::class, 'data'])
+        ->name('employees.data'); // didaftarkan sebelum resource, sama seperti training-modules/data
+
+    Route::get('employees/import', [EmployeeController::class, 'showImportForm'])
+        ->name('employees.import.form');
+    Route::post('employees/import', [EmployeeController::class, 'import'])
+        ->name('employees.import');
+
+    Route::get('employees/export/master', [EmployeeController::class, 'exportMaster'])
+        ->name('employees.export.master');
+
+    // 'show' TIDAK di-except — dipakai untuk halaman Detail Karyawan
+    Route::resource('employees', EmployeeController::class);
+
+    Route::post('employees/{employee}/contracts', [EmployeeContractController::class, 'store'])
+        ->name('employees.contracts.store');
+    Route::delete('employees/{employee}/contracts/{contract}', [EmployeeContractController::class, 'destroy'])
+        ->name('employees.contracts.destroy');
+
+    // Report
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/export/excel', [ReportController::class, 'exportExcel'])->name('reports.export.excel');
+    Route::get('/reports/export/pdf', [ReportController::class, 'exportPdf'])->name('reports.export.pdf');
+
+    // Template Sertifikat (singleton — 1 desain dipakai semua training)
+    Route::get('certificate-template', [CertificateTemplateController::class, 'edit'])
+        ->name('certificate-template.edit');
+    Route::post('certificate-template', [CertificateTemplateController::class, 'update'])
+        ->name('certificate-template.update');
+    Route::get('certificate-template/preview', [CertificateTemplateController::class, 'preview'])
+        ->name('certificate-template.preview');
+});
 ```
 
 > **Catatan:** guard `employee` (`guest:employee` / `auth:employee` di atas)
@@ -822,6 +831,127 @@ Sesuai permintaan Anda:
 ⚠️ **Kalau Anda pernah bookmark/share link lama** (`/dashboard`,
 `/employees`, dll — tanpa `/admin`), link itu akan **404** setelah update
 ini. Perlu update semua bookmark ke URL baru yang berawalan `/admin`.
+
+## 32. Fitur Baru — Batas Waktu Pre-Test/Post-Test + Countdown + Auto-Submit ✅
+
+### a. Migration baru
+```bash
+php artisan migrate
+```
+Menambahkan `pretest_time_limit_minutes` dan `posttest_time_limit_minutes`
+di `training_modules` (keduanya nullable — kosongkan = tanpa batas waktu,
+perilaku lama tetap berfungsi persis seperti sebelumnya).
+
+### b. Cara Kerja
+1. **HR** atur batas waktu (dalam menit) di **Master Training → Tambah/Edit**
+   — terpisah untuk pre-test dan post-test, karena durasi yang wajar bisa
+   beda (mis. post-test sengaja dibuat lebih ketat waktunya).
+2. Begitu karyawan **membuka halaman soal** (bukan saat submit), waktu mulai
+   dicatat dan **countdown otomatis muncul** di atas soal, format MM:SS,
+   berubah warna jadi merah kalau sisa ≤ 1 menit.
+3. **Waktu habis → form otomatis ter-submit** via JavaScript
+   (`form.submit()`), termasuk soal yang **belum terjawab** — sengaja pakai
+   `form.submit()` (bukan simulasi klik tombol) karena ini **tidak
+   menjalankan validasi HTML "required"**, jadi jawaban yang sudah diisi
+   tetap terkirim meski belum semua pertanyaan dijawab, persis sesuai
+   permintaan Anda ("selesai tidak selesai").
+4. Countdown dihitung dari **deadline tetap** (waktu mulai + batas waktu),
+   bukan dihitung ulang tiap reload halaman — jadi tidak bisa "curang"
+   dengan me-refresh halaman untuk reset waktu.
+5. Kalau karyawan menutup halaman lalu buka lagi **setelah waktu sudah
+   habis**, begitu halaman dimuat sistem langsung auto-submit dengan
+   jawaban yang ada saat itu (konsisten dengan poin 3 di atas).
+
+### c. Catatan
+- Kalau modul **tidak diberi batas waktu** (kolom dikosongkan), tidak ada
+  countdown yang muncul sama sekali — karyawan mengerjakan tanpa batas
+  waktu seperti sebelumnya.
+- Fitur ini murni client-side (JavaScript) untuk auto-submit — server tidak
+  menolak submission yang datang "terlambat". Untuk kebutuhan HR internal
+  seperti ini dianggap cukup; beri tahu saya kalau ke depannya perlu
+  proteksi server-side tambahan (mis. mencegah kecurangan dengan mematikan
+  JavaScript).
+
+## 33. Fitur Baru — Riwayat Semua Percobaan Post-Test Tersimpan ✅
+
+### a. Migration baru
+```bash
+php artisan migrate
+```
+Menambahkan tabel `employee_posttest_attempts` — satu baris per percobaan.
+
+### b. Cara Kerja
+Sebelumnya, saat karyawan mengulang post-test (karena skor di bawah minimum),
+data percobaan sebelumnya **ditimpa**. Sekarang setiap percobaan disimpan
+sebagai record baru yang **permanen — tidak pernah di-update atau dihapus**.
+
+Yang ditampilkan sekarang:
+- **Halaman Post-Test (karyawan)** — tabel riwayat semua percobaan
+  sebelumnya (nomor percobaan, skor, durasi, waktu) supaya karyawan bisa
+  melihat progres skornya sendiri.
+- **Halaman Selesai (karyawan)** — riwayat percobaan ditampilkan kalau
+  ternyata butuh lebih dari 1 kali percobaan sampai lulus.
+- **Detail Karyawan (HR)** — card baru "Riwayat Percobaan Post-Test",
+  dikelompokkan per modul training, supaya HRD bisa melihat berapa kali
+  seorang karyawan mengulang dan bagaimana perkembangan skornya.
+- Pesan setelah submit sekarang menyebut nomor percobaan
+  ("Percobaan ke-3 selesai...").
+
+### c. Keputusan Desain
+- **Dua tabel dengan peran berbeda, bukan duplikasi:**
+  `employee_module_progress` tetap dipertahankan sebagai **status/posisi
+  terkini** (dipakai untuk logic tahap alur & gating pretest→materi→posttest),
+  sementara `employee_posttest_attempts` adalah **sumber kebenaran riwayat
+  lengkap**. Kolom `posttest_*` di tabel progress memang masih ditimpa tiap
+  percobaan, tapi itu tidak masalah karena riwayat aslinya sudah aman
+  tersimpan di tabel attempts.
+- **Pre-test tidak dibuatkan riwayat percobaan** karena secara desain
+  pre-test hanya dikerjakan **satu kali** (tidak ada mekanisme mengulang) —
+  beri tahu saya kalau ternyata pre-test juga perlu bisa diulang.
+- **Data percobaan lama (sebelum update ini) tidak bisa dipulihkan** karena
+  memang sudah tertimpa oleh sistem versi sebelumnya. Riwayat baru mulai
+  tercatat sejak migration ini dijalankan.
+
+## 34. Fitur Baru — Gambar pada Pertanyaan & Opsi Jawaban ✅
+
+### a. Migration baru
+```bash
+php artisan migrate
+```
+Menambahkan 5 kolom path gambar (`question_image_path`,
+`option_a_image_path` s/d `option_d_image_path`) di
+`training_module_questions`, sekaligus **menjadikan kolom teks pertanyaan &
+opsi nullable** supaya bisa membuat soal yang isinya gambar saja.
+
+### b. Route baru
+Sudah termasuk di blok lengkap **bagian 3** — `questions.image`, sengaja
+diletakkan **di LUAR prefix `/admin`** karena gambar ini perlu diakses oleh
+dua pihak: HR (di halaman Edit Master Training) dan karyawan (saat
+mengerjakan test di Portal).
+
+### c. Cara Kerja
+- Di **Master Training → Edit → Bank Soal**, tiap pertanyaan dan tiap opsi
+  (A/B/C/D) sekarang punya input upload gambar sendiri.
+- Tiap elemen boleh diisi **teks saja, gambar saja, atau keduanya** —
+  validasi memastikan minimal salah satu terisi (tidak boleh kosong
+  dua-duanya). Ini memungkinkan soal seperti "Pilih rambu evakuasi yang
+  benar" dengan 4 opsi berupa gambar tanpa teks.
+- Format: JPG/PNG, maksimal **5MB per gambar**.
+- Gambar disimpan di **disk privat** (`storage/app/private/question-images`)
+  — konsisten dengan materi training dan template sertifikat. Tidak ada URL
+  publik langsung; akses harus lewat route `questions.image`.
+- **Menghapus soal otomatis menghapus semua gambarnya** dari storage, supaya
+  tidak menumpuk jadi file sampah.
+
+### d. Catatan
+- Soal lama yang sudah terlanjur dibuat tetap berfungsi normal — kolom
+  gambar hanya `null` saja.
+- **Route `questions.image` belum diberi pembatasan akses** — siapa pun yang
+  tahu URL-nya bisa melihat gambar soal (meski tidak bisa menebak isi
+  jawabannya dari situ). Ini konsekuensi dari kebutuhan agar HR dan karyawan
+  sama-sama bisa mengaksesnya. Kalau soal-soal Anda bersifat rahasia dan ini
+  jadi perhatian, beri tahu saya — bisa ditambahkan pengecekan agar hanya
+  bisa diakses karyawan yang sedang login atau dari sisi admin.
 
 ## 18. Update — Tampilan Direstyle (Sidebar Admin Panel Style) ✅
 

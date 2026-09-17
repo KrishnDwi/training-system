@@ -131,7 +131,22 @@ class EmployeeController extends Controller
 
         $missingMandatoryModules = $employee->missingMandatoryModules();
 
-        return view('employees.show', compact('employee', 'trainingHistories', 'missingMandatoryModules'));
+        // Riwayat SEMUA percobaan post-test, dikelompokkan per modul —
+        // berguna untuk HR melihat berapa kali karyawan mengulang dan
+        // bagaimana progres skornya.
+        $posttestAttempts = \App\Models\EmployeePosttestAttempt::with('trainingModule')
+            ->where('employee_id', $employee->id)
+            ->orderBy('training_module_id')
+            ->orderBy('attempt_number')
+            ->get()
+            ->groupBy('training_module_id');
+
+        return view('employees.show', compact(
+            'employee',
+            'trainingHistories',
+            'missingMandatoryModules',
+            'posttestAttempts'
+        ));
     }
 
     public function showImportForm()

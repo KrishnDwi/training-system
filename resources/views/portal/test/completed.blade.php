@@ -44,6 +44,33 @@
                 Training ini perlu diulang lagi dalam {{ $trainingModule->validity_months }} bulan.
             </p>
         @endif
+
+        @if($posttestAttempts->count() > 1)
+            <hr>
+            <p class="mb-2 text-muted small">Riwayat percobaan post-test Anda:</p>
+            <table class="table table-sm mb-0">
+                <thead>
+                    <tr><th>Percobaan</th><th>Skor</th><th>Hasil</th><th>Durasi</th><th>Waktu</th></tr>
+                </thead>
+                <tbody>
+                    @foreach($posttestAttempts as $attempt)
+                        <tr>
+                            <td>Ke-{{ $attempt->attempt_number }}</td>
+                            <td class="fw-semibold">{{ $attempt->score }}</td>
+                            <td>
+                                @if($attempt->passed)
+                                    <span class="badge bg-success">Lulus</span>
+                                @else
+                                    <span class="badge bg-secondary">Belum Lulus</span>
+                                @endif
+                            </td>
+                            <td>{{ $attempt->duration ?? '-' }}</td>
+                            <td>{{ $attempt->completed_at->format('d M Y H:i') }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
     </div>
 </div>
 

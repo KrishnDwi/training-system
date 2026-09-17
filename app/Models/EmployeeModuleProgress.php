@@ -47,6 +47,18 @@ class EmployeeModuleProgress extends Model
     }
 
     /**
+     * Riwayat SEMUA percobaan post-test untuk pasangan (karyawan, modul) ini.
+     * Tabel progress menyimpan status TERKINI; tabel attempts menyimpan
+     * riwayat lengkapnya (tidak pernah ditimpa).
+     */
+    public function posttestAttempts()
+    {
+        return EmployeePosttestAttempt::where('employee_id', $this->employee_id)
+            ->where('training_module_id', $this->training_module_id)
+            ->orderBy('attempt_number');
+    }
+
+    /**
      * Tahap alur saat ini: 'pretest' | 'material' | 'posttest' | 'completed'.
      * Post-test yang belum lulus otomatis kembali ke tahap 'posttest' (retry),
      * BUKAN 'completed' — sesuai keputusan: harus lulus nilai minimum dulu.
