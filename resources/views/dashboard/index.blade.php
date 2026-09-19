@@ -8,28 +8,28 @@
 
 {{-- ===== Kartu Ringkasan Utama ===== --}}
 <div class="row g-3 mb-3">
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
         <div class="stat-card">
             <div class="stat-title">Total Karyawan</div>
             <div class="stat-value">{{ $totalEmployees }}</div>
             <div class="stat-caption">Karyawan dengan status aktif</div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
         <div class="stat-card">
             <div class="stat-title">Total Modul Training</div>
             <div class="stat-value">{{ $totalModules }}</div>
             <div class="stat-caption">Modul training aktif</div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
         <div class="stat-card">
             <div class="stat-title">Total Training Session</div>
             <div class="stat-value">{{ $totalSessions }}</div>
             <div class="stat-caption">Seluruh session yang pernah dibuat</div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
         <div class="stat-card accent-red">
             <div class="stat-title">Total Mandatory Training</div>
             <div class="stat-value">{{ $totalMandatoryModules }}</div>
@@ -39,28 +39,28 @@
 </div>
 
 <div class="row g-3 mb-3">
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
         <div class="stat-card">
             <div class="stat-title">Training Hari Ini</div>
             <div class="stat-value">{{ $sessionsToday }}</div>
             <div class="stat-caption">Session dengan tanggal hari ini</div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
         <div class="stat-card accent-blue">
             <div class="stat-title">Training Bulan Ini</div>
             <div class="stat-value">{{ $sessionsThisMonth }}</div>
             <div class="stat-caption">Session pada bulan berjalan</div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
         <div class="stat-card" style="border-color:#fde68a;">
             <div class="stat-title">Segera Perlu Diulang</div>
             <div class="stat-value" style="color:#d97706;">{{ $expiringSoonCount }}</div>
             <div class="stat-caption">Jadwal pengulangan ≤ 30 hari lagi</div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
         <div class="stat-card accent-red">
             <div class="stat-title">Sudah Waktunya Diulang</div>
             <div class="stat-value">{{ $expiredCount }}</div>
@@ -85,7 +85,7 @@
 
 {{-- ===== Charts ===== --}}
 <div class="row g-3 mb-3">
-    <div class="col-md-6">
+    <div class="col-12 col-md-6">
         <div class="content-card h-100">
             <div class="content-card-header">Statistik Training per Departemen ({{ date('Y') }})</div>
             <div class="content-card-body">
@@ -93,7 +93,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-12 col-md-6">
         <div class="content-card h-100">
             <div class="content-card-header">Statistik Training per Bulan ({{ date('Y') }})</div>
             <div class="content-card-body">
@@ -110,7 +110,8 @@
         <span class="badge bg-danger">{{ $trainingsNeededThisYear->sum('need_count') }} slot karyawan</span>
     </div>
     <div class="content-card-body p-0">
-        <table class="table mb-0 align-middle">
+        <div class="table-responsive-wrapper">
+<table class="table mb-0 align-middle">
             <thead>
                 <tr>
                     <th class="ps-4">Modul Training</th>
@@ -145,6 +146,7 @@
                 @endforelse
             </tbody>
         </table>
+</div>
     </div>
 </div>
 <small class="text-muted d-block mt-2">

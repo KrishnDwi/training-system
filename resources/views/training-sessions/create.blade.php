@@ -12,7 +12,7 @@
         <div class="content-card-header">Detail Session</div>
         <div class="content-card-body">
             <div class="row g-3">
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <label class="form-label">Modul Training <span class="text-danger">*</span></label>
                     <select name="training_module_id" class="form-select @error('training_module_id') is-invalid @enderror" required>
                         <option value="">-- Pilih Modul Training --</option>
@@ -25,35 +25,35 @@
                     @error('training_module_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <label class="form-label">Trainer <span class="text-danger">*</span></label>
                     <input type="text" name="trainer_name" class="form-control @error('trainer_name') is-invalid @enderror"
                            value="{{ old('trainer_name') }}" placeholder="Nama HOD / HRD" required>
                     @error('trainer_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-6 col-md-3">
                     <label class="form-label">Tanggal Training <span class="text-danger">*</span></label>
                     <input type="date" name="session_date" class="form-control @error('session_date') is-invalid @enderror"
                            value="{{ old('session_date') }}" required>
                     @error('session_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
 
-                <div class="col-md-2">
+                <div class="col-6 col-md-2">
                     <label class="form-label">Jam Mulai <span class="text-danger">*</span></label>
                     <input type="time" name="start_time" class="form-control @error('start_time') is-invalid @enderror"
                            value="{{ old('start_time') }}" required>
                     @error('start_time') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
 
-                <div class="col-md-2">
+                <div class="col-6 col-md-2">
                     <label class="form-label">Jam Selesai <span class="text-danger">*</span></label>
                     <input type="time" name="end_time" class="form-control @error('end_time') is-invalid @enderror"
                            value="{{ old('end_time') }}" required>
                     @error('end_time') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
 
-                <div class="col-md-2">
+                <div class="col-6 col-md-2">
                     <label class="form-label">Durasi Aktual (menit)</label>
                     <input type="number" step="5" name="actual_duration_minutes"
                            class="form-control @error('actual_duration_minutes') is-invalid @enderror"
@@ -61,7 +61,7 @@
                     @error('actual_duration_minutes') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-6 col-md-3">
                     <label class="form-label">Lokasi</label>
                     <input type="text" name="location" class="form-control @error('location') is-invalid @enderror"
                            value="{{ old('location') }}">
@@ -88,10 +88,10 @@
             @enderror
 
             <div class="row g-2 mb-3">
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <input type="text" id="search-employee" class="form-control" placeholder="Cari nama / nomor karyawan...">
                 </div>
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <select id="filter-department" class="form-select">
                         <option value="">Semua Departemen</option>
                         @foreach($departments as $dept)
@@ -99,14 +99,15 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-4 d-flex align-items-center gap-2">
-                    <button type="button" id="btn-select-visible" class="btn btn-outline-primary btn-sm">Pilih Semua (Terfilter)</button>
-                    <button type="button" id="btn-clear-selection" class="btn btn-outline-secondary btn-sm">Kosongkan</button>
+                <div class="col-12 col-md-4 d-flex align-items-center gap-2">
+                    <button type="button" id="btn-select-visible" class="btn btn-outline-primary btn-sm flex-fill">Pilih Semua (Terfilter)</button>
+                    <button type="button" id="btn-clear-selection" class="btn btn-outline-secondary btn-sm flex-fill">Kosongkan</button>
                 </div>
             </div>
 
-            <div style="max-height: 400px; overflow-y: auto;">
-                <table class="table table-sm table-hover">
+            <div style="max-height: 55vh; overflow-y: auto;">
+                <div class="table-responsive-wrapper">
+<table class="table table-sm table-hover">
                     <thead class="sticky-top bg-white">
                         <tr>
                             <th style="width: 40px;"></th>
@@ -122,7 +123,7 @@
                             <tr class="employee-row" data-department="{{ $emp->department_id }}"
                                 data-search="{{ strtolower($emp->name . ' ' . $emp->employee_number) }}">
                                 <td>
-                                    <input type="checkbox" class="form-check-input employee-checkbox"
+                                    <input type="checkbox" class="form-check-input employee-checkbox" style="width:20px;height:20px;"
                                            name="employee_ids[]" value="{{ $emp->id }}"
                                            @checked(in_array($emp->id, $oldSelected))>
                                 </td>
@@ -134,12 +135,15 @@
                         @endforeach
                     </tbody>
                 </table>
+</div>
             </div>
         </div>
     </div>
 
-    <button type="submit" class="btn btn-primary">Simpan Training Session</button>
-    <a href="{{ route('training-sessions.index') }}" class="btn btn-outline-secondary">Batal</a>
+    <div class="d-flex flex-column flex-md-row gap-2">
+        <button type="submit" class="btn btn-primary">Simpan Training Session</button>
+        <a href="{{ route('training-sessions.index') }}" class="btn btn-outline-secondary">Batal</a>
+    </div>
 </form>
 @endsection
 

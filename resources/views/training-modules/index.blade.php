@@ -13,7 +13,8 @@
 @section('content')
 <div class="content-card">
     <div class="content-card-body">
-        <table id="table-modules" class="table table-hover w-100">
+        <div class="table-responsive-wrapper">
+<table id="table-modules" class="table table-hover w-100">
             <thead>
                 <tr>
                     <th>Kode</th>
@@ -26,6 +27,7 @@
                 </tr>
             </thead>
         </table>
+</div>
     </div>
 </div>
 @endsection
@@ -34,6 +36,8 @@
 <script>
 $(function () {
     $('#table-modules').DataTable({
+        scrollX: true,
+        language: { search: 'Cari:', lengthMenu: 'Tampil _MENU_', info: '_START_-_END_ dari _TOTAL_', paginate: { previous: 'Sebelumnya', next: 'Berikutnya' }, emptyTable: 'Tidak ada data' },
         ajax: '{{ route('training-modules.data') }}',
         columns: [
             { data: 'code' },

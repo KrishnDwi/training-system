@@ -17,7 +17,8 @@
                     belum ada yang mencapai nilai minimum <strong>{{ $trainingModule->passing_score }}</strong>.
                     Silakan coba lagi di bawah ini.
                 </p>
-                <table class="table table-sm mb-0">
+                <div class="table-responsive-wrapper">
+<table class="table table-sm mb-0">
                     <thead>
                         <tr><th>Percobaan</th><th>Skor</th><th>Durasi</th><th>Waktu</th></tr>
                     </thead>
@@ -32,6 +33,7 @@
                         @endforeach
                     </tbody>
                 </table>
+</div>
             </div>
         @else
             <p class="text-muted">

@@ -26,7 +26,7 @@
 
 <div class="row g-3">
     @forelse($modules as $module)
-        <div class="col-md-6">
+        <div class="col-12 col-md-6">
             <div class="content-card h-100">
                 <div class="content-card-header d-flex justify-content-between align-items-start">
                     <span>{{ $module->name }}</span>

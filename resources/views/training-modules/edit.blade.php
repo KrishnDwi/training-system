@@ -33,7 +33,8 @@
             (perlu login). Mendukung semua jenis file (PDF, PPT, Word, video, dll), maks 50MB.
         </p>
 
-        <table class="table table-sm mb-3">
+        <div class="table-responsive-wrapper">
+<table class="table table-sm mb-3">
             <thead><tr><th>Judul</th><th>Nama File</th><th>Ukuran</th><th>Diupload</th><th>Aksi</th></tr></thead>
             <tbody>
                 @forelse($trainingModule->materials as $material)
@@ -55,6 +56,7 @@
                 @endforelse
             </tbody>
         </table>
+</div>
 
         <form action="{{ route('training-modules.materials.store', $trainingModule) }}" method="POST" enctype="multipart/form-data" class="row g-2 align-items-end">
             @csrf

@@ -17,14 +17,14 @@
         </a>
 
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-12 col-md-6">
                 <p class="mb-1 text-muted small">Skor Pre-Test</p>
                 <p class="fs-4 fw-bold mb-1">{{ $progress->pretest_score }}</p>
                 @if($progress->pretest_duration)
                     <p class="text-muted small mb-0">Dikerjakan dalam {{ $progress->pretest_duration }}</p>
                 @endif
             </div>
-            <div class="col-md-6">
+            <div class="col-12 col-md-6">
                 <p class="mb-1 text-muted small">Skor Post-Test</p>
                 <p class="fs-4 fw-bold text-success mb-1">{{ $progress->posttest_score }}</p>
                 @if($progress->posttest_duration)
@@ -48,7 +48,8 @@
         @if($posttestAttempts->count() > 1)
             <hr>
             <p class="mb-2 text-muted small">Riwayat percobaan post-test Anda:</p>
-            <table class="table table-sm mb-0">
+            <div class="table-responsive-wrapper">
+<table class="table table-sm mb-0">
                 <thead>
                     <tr><th>Percobaan</th><th>Skor</th><th>Hasil</th><th>Durasi</th><th>Waktu</th></tr>
                 </thead>
@@ -70,6 +71,7 @@
                     @endforeach
                 </tbody>
             </table>
+</div>
         @endif
     </div>
 </div>

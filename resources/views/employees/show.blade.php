@@ -18,12 +18,12 @@
     <div class="content-card-header">Identitas & Pekerjaan</div>
     <div class="content-card-body">
         <div class="row">
-            <div class="col-md-4">
+            <div class="col-12 col-md-4">
                 <p class="mb-2"><strong>Nomor Karyawan:</strong> {{ $employee->employee_number }}</p>
                 <p class="mb-2"><strong>Departemen:</strong> {{ $employee->department->name }}</p>
                 <p class="mb-0"><strong>Jabatan:</strong> {{ $employee->position ?? '-' }}</p>
             </div>
-            <div class="col-md-4">
+            <div class="col-12 col-md-4">
                 @php
                     $typeLabel = ['staff'=>'Staff','dw'=>'Daily Worker','casual'=>'Casual','trainee'=>'Trainee','outsourcing'=>'Outsourcing'];
                     $statusBadge = ['active'=>'bg-success','inactive'=>'bg-secondary','resigned'=>'bg-dark'];
@@ -33,7 +33,7 @@
                 <p class="mb-2"><strong>Status:</strong> <span class="badge {{ $statusBadge[$employee->employment_status] }}">{{ $statusLabel[$employee->employment_status] }}</span></p>
                 <p class="mb-0"><strong>Tanggal Masuk:</strong> {{ $employee->join_date?->format('d M Y') ?? '-' }}</p>
             </div>
-            <div class="col-md-4">
+            <div class="col-12 col-md-4">
                 <p class="mb-2"><strong>Email:</strong> {{ $employee->email ?? '-' }}</p>
                 <p class="mb-0"><strong>No. Telepon:</strong> {{ $employee->phone ?? '-' }}</p>
             </div>
@@ -46,17 +46,17 @@
     <div class="content-card-header">Data Pribadi</div>
     <div class="content-card-body">
         <div class="row">
-            <div class="col-md-4">
+            <div class="col-12 col-md-4">
                 <p class="mb-2"><strong>Tempat, Tanggal Lahir:</strong> {{ $employee->place_of_birth ?? '-' }}{{ $employee->date_of_birth ? ', ' . $employee->date_of_birth->format('d M Y') : '' }}</p>
                 <p class="mb-2"><strong>Usia:</strong> {{ $employee->age ? $employee->age . ' tahun' : '-' }}</p>
                 <p class="mb-0"><strong>Gender:</strong> {{ $employee->gender === 'male' ? 'Laki-laki' : ($employee->gender === 'female' ? 'Perempuan' : '-') }}</p>
             </div>
-            <div class="col-md-4">
+            <div class="col-12 col-md-4">
                 <p class="mb-2"><strong>Agama:</strong> {{ $employee->religion ?? '-' }}</p>
                 <p class="mb-2"><strong>Golongan Darah:</strong> {{ $employee->blood_type ?? '-' }}</p>
                 <p class="mb-0"><strong>Level:</strong> {{ $employee->job_level ?? '-' }}</p>
             </div>
-            <div class="col-md-4">
+            <div class="col-12 col-md-4">
                 <p class="mb-2"><strong>Alamat:</strong> {{ $employee->address ?? '-' }}</p>
                 <p class="mb-0"><strong>Daerah:</strong> {{ $employee->region ?? '-' }}</p>
             </div>
@@ -69,14 +69,14 @@
     <div class="content-card-header">Keluarga & Kontak Darurat</div>
     <div class="content-card-body">
         <div class="row">
-            <div class="col-md-4">
+            <div class="col-12 col-md-4">
                 <p class="mb-2"><strong>Pasangan:</strong> {{ $employee->spouse_name ?? '-' }}</p>
                 <p class="mb-0"><strong>Tgl Lahir Pasangan:</strong> {{ $employee->spouse_date_of_birth?->format('d M Y') ?? '-' }}</p>
             </div>
-            <div class="col-md-4">
+            <div class="col-12 col-md-4">
                 <p class="mb-0"><strong>Jumlah Anak:</strong> {{ $employee->children_count ?? '-' }}</p>
             </div>
-            <div class="col-md-4">
+            <div class="col-12 col-md-4">
                 <p class="mb-2"><strong>Kontak Darurat:</strong> {{ $employee->emergency_contact_name ?? '-' }}</p>
                 <p class="mb-0"><strong>Hubungan:</strong> {{ $employee->emergency_contact_relationship ?? '-' }}</p>
             </div>
@@ -92,15 +92,15 @@
     </div>
     <div class="content-card-body">
         <div class="row">
-            <div class="col-md-4">
+            <div class="col-12 col-md-4">
                 <p class="mb-2"><strong>NPWP:</strong> {{ $employee->npwp_no ?? '-' }}</p>
                 <p class="mb-0"><strong>NIK KTP:</strong> {{ $employee->nik_ktp ?? '-' }}</p>
             </div>
-            <div class="col-md-4">
+            <div class="col-12 col-md-4">
                 <p class="mb-2"><strong>Rekening:</strong> {{ $employee->bank_account_number ?? '-' }}</p>
                 <p class="mb-0"><strong>A/N:</strong> {{ $employee->bank_account_name ?? '-' }}</p>
             </div>
-            <div class="col-md-4">
+            <div class="col-12 col-md-4">
                 <p class="mb-2"><strong>Jamsostek:</strong> {{ $employee->jamsostek_no ?? '-' }}</p>
                 <p class="mb-0"><strong>BPJS:</strong> {{ $employee->bpjs_no ?? '-' }}</p>
             </div>
@@ -114,7 +114,8 @@
 <div class="content-card mb-3">
     <div class="content-card-header">Riwayat Kontrak Kerja</div>
     <div class="content-card-body">
-        <table class="table table-sm mb-3">
+        <div class="table-responsive-wrapper">
+<table class="table table-sm mb-3">
             <thead>
                 <tr><th>Urutan</th><th>Tipe</th><th>Mulai</th><th>Berakhir</th><th>Catatan</th><th>Aksi</th></tr>
             </thead>
@@ -138,6 +139,7 @@
                 @endforelse
             </tbody>
         </table>
+</div>
 
         <form action="{{ route('employees.contracts.store', $employee) }}" method="POST" class="row g-2 align-items-end">
             @csrf
@@ -179,7 +181,8 @@
         <span class="badge bg-danger">{{ $missingMandatoryModules->count() }} modul</span>
     </div>
     <div class="content-card-body p-0">
-        <table class="table mb-0">
+        <div class="table-responsive-wrapper">
+<table class="table mb-0">
             <thead><tr><th class="ps-4">Modul Training</th><th>Kategori</th><th class="pe-4">Diulang Setiap</th></tr></thead>
             <tbody>
                 @forelse($missingMandatoryModules as $module)
@@ -193,6 +196,7 @@
                 @endforelse
             </tbody>
         </table>
+</div>
     </div>
 </div>
 
@@ -200,7 +204,8 @@
 <div class="content-card">
     <div class="content-card-header">Riwayat Training ({{ $trainingHistories->count() }} record)</div>
     <div class="content-card-body p-0">
-        <table class="table mb-0 align-middle">
+        <div class="table-responsive-wrapper">
+<table class="table mb-0 align-middle">
             <thead><tr><th class="ps-4">Training</th><th>Mandatory</th><th>Tanggal</th><th>Trainer</th><th>Jadwal Ulang</th><th class="pe-4">Status</th></tr></thead>
             <tbody>
                 @forelse($trainingHistories as $history)
@@ -223,6 +228,7 @@
                 @endforelse
             </tbody>
         </table>
+</div>
     </div>
 </div>
 
@@ -231,7 +237,8 @@
 <div class="content-card mt-3">
     <div class="content-card-header">Riwayat Percobaan Post-Test</div>
     <div class="content-card-body p-0">
-        <table class="table mb-0 align-middle">
+        <div class="table-responsive-wrapper">
+<table class="table mb-0 align-middle">
             <thead>
                 <tr>
                     <th class="ps-4">Modul Training</th>
@@ -267,6 +274,7 @@
                 @endforeach
             </tbody>
         </table>
+</div>
     </div>
 </div>
 @endif

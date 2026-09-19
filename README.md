@@ -953,6 +953,76 @@ mengerjakan test di Portal).
   jadi perhatian, beri tahu saya — bisa ditambahkan pengecekan agar hanya
   bisa diakses karyawan yang sedang login atau dari sisi admin.
 
+## 35. Update Besar — Tampilan Mobile-First (Responsive ke Desktop) ✅
+
+Seluruh tampilan sistem dirombak dengan pendekatan **mobile-first**: gaya
+dasar CSS ditulis untuk layar HP, lalu `@media (min-width: 992px)` yang
+meng-*upgrade* ke tampilan desktop — kebalikan dari sebelumnya yang desktop
+dulu baru dikecilkan.
+
+**Tidak perlu migration** — murni perubahan tampilan (layout + view).
+
+### a. Layout Admin (`layouts/app.blade.php`)
+- **Sidebar jadi drawer** di HP: tersembunyi, dibuka lewat tombol hamburger
+  di topbar, ada backdrop gelap yang bisa diklik untuk menutup. Di desktop
+  (≥992px) kembali jadi sidebar permanen seperti sebelumnya.
+- **Bottom navigation bar** khusus HP berisi 4 menu tersering (Dashboard,
+  Karyawan, Session, Report) — pola navigasi yang familiar di aplikasi HP.
+- **Topbar sticky** berisi brand, selalu terlihat saat scroll.
+- Tombol aksi halaman (Tambah/Export/Import) jadi **full-width dan ditumpuk**
+  di HP, kembali sejajar di desktop.
+
+### b. Layout Portal Karyawan (`layouts/portal.blade.php`)
+- Navbar sticky, nama karyawan disembunyikan di layar sangat kecil (tetap
+  ada tombol Keluar).
+- **Radio jawaban dibuat sebagai kartu besar** dengan target sentuh lega
+  (padding 12px, radio 20px) dan **highlight biru saat dipilih** — jauh
+  lebih mudah ditekan dengan jempol daripada radio kecil standar.
+- **Timer countdown sticky** menempel di atas layar saat scroll, jadi sisa
+  waktu selalu terlihat meski soalnya panjang.
+
+### c. Perbaikan Umum di Semua Halaman
+- **Font input diset 16px di HP** — ini mencegah Safari/Chrome iOS melakukan
+  auto-zoom yang mengganggu setiap kali user menekan input.
+- **Semua tabel dibungkus wrapper scroll horizontal** — tabel lebar (Data
+  Karyawan, Report, dll) bisa digeser ke samping tanpa merusak layout
+  halaman.
+- **DataTables** diberi `scrollX: true` + label bahasa Indonesia.
+- **Grid disesuaikan**: kartu statistik jadi 2-per-baris di HP (bukan
+  1 penuh, supaya tidak terlalu panjang ke bawah), form field sempit
+  (`col-md-2`/`col-md-3`) jadi setengah/penuh di HP, chart & kartu modul
+  full-width.
+- **Safe area iPhone** diperhitungkan (`env(safe-area-inset-*)`) supaya
+  konten tidak tertutup notch atau home indicator.
+- Area pilih peserta di Training Session pakai tinggi proporsional layar
+  (`55vh`) dengan checkbox yang diperbesar.
+
+### d. Catatan
+- Halaman **PDF** (`reports/pdf`, `certificates/template`) sengaja TIDAK
+  diubah — itu untuk dicetak/diunduh, bukan dilihat di layar.
+- Kalau ada halaman yang masih terasa sempit atau ada elemen yang terpotong
+  di HP tertentu, beri tahu saya halaman mana — saya sesuaikan lagi.
+
+## 36. Update — Halaman Report Dibuat Lebih Detail untuk HP ✅
+
+Sebelumnya halaman Report di HP cuma mengandalkan scroll horizontal untuk
+tabel 8 kolomnya — bisa dipakai tapi tidak nyaman. Sekarang dibuat 2 tampilan
+terpisah tergantung ukuran layar:
+
+- **Di HP**: setiap baris riwayat training ditampilkan sebagai **kartu
+  bertumpuk** (nama karyawan, departemen, training, mandatory, tanggal,
+  trainer, jadwal ulang, status) — tidak ada lagi scroll horizontal maupun
+  teks kekecilan.
+- **Di desktop (≥768px)**: tetap tabel penuh seperti sebelumnya, tidak ada
+  yang berubah.
+- **Filter jadi collapsible di HP** — disembunyikan di balik tombol
+  "Filter & Export" supaya halaman tidak langsung penuh dengan form saat
+  dibuka, tinggal tap untuk membuka. Di desktop filter tetap selalu
+  terbuka seperti biasa.
+
+Tidak perlu migration — murni perubahan tampilan, cuma 1 file yang berubah:
+`resources/views/reports/index.blade.php`.
+
 ## 18. Update — Tampilan Direstyle (Sidebar Admin Panel Style) ✅
 
 Atas permintaan Anda, seluruh tampilan direstyle mengikuti gaya admin panel yang

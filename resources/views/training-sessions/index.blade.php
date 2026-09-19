@@ -13,7 +13,8 @@
 @section('content')
 <div class="content-card">
     <div class="content-card-body">
-        <table class="table table-hover align-middle">
+        <div class="table-responsive-wrapper">
+<table class="table table-hover align-middle">
             <thead>
                 <tr>
                     <th>Tanggal</th>
@@ -46,6 +47,7 @@
                 @endforelse
             </tbody>
         </table>
+</div>
 
         {{ $sessions->links() }}
     </div>

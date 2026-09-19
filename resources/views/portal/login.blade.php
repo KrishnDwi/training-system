@@ -4,8 +4,8 @@
 
 @section('content')
 <div class="row justify-content-center">
-    <div class="col-md-5">
-        <div class="content-card mt-5">
+    <div class="col-12 col-md-8 col-lg-5">
+        <div class="content-card mt-3 mt-md-5">
             <div class="content-card-body">
                 <h4 class="mb-1 text-center">Portal Karyawan</h4>
                 <p class="text-muted text-center mb-4">Akses materi training</p>

@@ -31,7 +31,7 @@
 <div class="content-card mb-3">
     <div class="content-card-body">
         <div class="row g-2">
-            <div class="col-md-3">
+            <div class="col-12 col-md-3">
                 <select id="filter-department" class="form-select">
                     <option value="">Semua Departemen</option>
                     @foreach($departments as $dept)
@@ -39,7 +39,7 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-12 col-md-3">
                 <select id="filter-status" class="form-select">
                     <option value="">Semua Status</option>
                     <option value="active">Aktif</option>
@@ -47,7 +47,7 @@
                     <option value="resigned">Resign</option>
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-12 col-md-3">
                 <select id="filter-type" class="form-select">
                     <option value="">Semua Kategori Pekerja</option>
                     <option value="staff">Staff</option>
@@ -63,7 +63,8 @@
 
 <div class="content-card">
     <div class="content-card-body">
-        <table id="table-employees" class="table table-hover w-100">
+        <div class="table-responsive-wrapper">
+<table id="table-employees" class="table table-hover w-100">
             <thead>
                 <tr>
                     <th>Nomor Karyawan</th>
@@ -77,6 +78,7 @@
                 </tr>
             </thead>
         </table>
+</div>
     </div>
 </div>
 @endsection
@@ -85,6 +87,8 @@
 <script>
 $(function () {
     const table = $('#table-employees').DataTable({
+        scrollX: true,
+        language: { search: 'Cari:', lengthMenu: 'Tampil _MENU_', info: '_START_-_END_ dari _TOTAL_', paginate: { previous: 'Sebelumnya', next: 'Berikutnya' }, emptyTable: 'Tidak ada data' },
         ajax: {
             url: '{{ route('employees.data') }}',
             data: function (d) {

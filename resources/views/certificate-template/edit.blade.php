@@ -33,16 +33,16 @@
             @csrf
 
             <div class="row g-3 mb-4">
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <label class="form-label">Gambar Background Sertifikat {{ $template ? '' : '*' }}</label>
                     <input type="file" name="background_image" class="form-control @error('background_image') is-invalid @enderror" accept="image/*" {{ $template ? '' : 'required' }}>
                     @error('background_image') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
-                <div class="col-md-3">
+                <div class="col-6 col-md-3">
                     <label class="form-label">Lebar Halaman (mm)</label>
                     <input type="number" name="page_width_mm" class="form-control" value="{{ old('page_width_mm', $template->page_width_mm ?? 297) }}" required>
                 </div>
-                <div class="col-md-3">
+                <div class="col-6 col-md-3">
                     <label class="form-label">Tinggi Halaman (mm)</label>
                     <input type="number" name="page_height_mm" class="form-control" value="{{ old('page_height_mm', $template->page_height_mm ?? 210) }}" required>
                     <small class="text-muted">Default A4 landscape (297 × 210mm)</small>
@@ -74,23 +74,23 @@
                         <label class="form-check-label fw-semibold" for="enabled_{{ $key }}">{{ $label }}</label>
                     </div>
                     <div class="row g-2">
-                        <div class="col-md-2">
+                        <div class="col-6 col-md-2">
                             <label class="form-label small">X (mm)</label>
                             <input type="number" step="0.5" name="fields[{{ $key }}][x]" class="form-control form-control-sm" value="{{ $fields[$key]['x'] }}" required>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-6 col-md-2">
                             <label class="form-label small">Y (mm)</label>
                             <input type="number" step="0.5" name="fields[{{ $key }}][y]" class="form-control form-control-sm" value="{{ $fields[$key]['y'] }}" required>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-6 col-md-2">
                             <label class="form-label small">Ukuran Font (pt)</label>
                             <input type="number" name="fields[{{ $key }}][font_size]" class="form-control form-control-sm" value="{{ $fields[$key]['font_size'] }}" required>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-6 col-md-2">
                             <label class="form-label small">Warna</label>
                             <input type="color" name="fields[{{ $key }}][color]" class="form-control form-control-sm form-control-color" value="{{ $fields[$key]['color'] }}" required>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-6 col-md-2">
                             <label class="form-label small">Rata</label>
                             <select name="fields[{{ $key }}][align]" class="form-select form-select-sm" required>
                                 <option value="left" {{ $fields[$key]['align'] === 'left' ? 'selected' : '' }}>Kiri</option>
